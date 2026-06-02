@@ -1,0 +1,6 @@
+flask
+flask-cors
+requests
+PyMuPDF
+sentence-transformers
+faiss-cpu
