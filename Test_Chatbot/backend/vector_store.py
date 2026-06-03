@@ -70,27 +70,45 @@ def rerank(query, candidates, top_k=3):
     if not candidates:
         return []
 
-    # Support query expansion in reranker to handle entity/term mismatch
-    q_lower = query.lower()
-    alt_queries = [query]
-    if "iit roorkee" in q_lower or "iitr" in q_lower:
-        alt_q = query.replace("IIT Roorkee", "the Institute").replace("IITR", "the Institute").replace("iit roorkee", "the Institute").replace("iitr", "the Institute")
-        alt_queries.append(alt_q)
-    elif "institute" in q_lower:
-        alt_q = query.replace("the Institute", "IIT Roorkee").replace("Institute", "IIT Roorkee").replace("the institute", "IIT Roorkee").replace("institute", "IIT Roorkee")
-        alt_queries.append(alt_q)
+    # Support query expansion and sub-question splitting in reranker
+    import re
+    sub_q = [q.strip() for q in re.split(r'(?i)\?|\s+and\s+|\s+also\s+|\s+or\s+', query) if q.strip()]
+    q_variants = [query] + sub_q
 
-    # Score candidates against all generated query variants, keeping the maximum score
+    all_queries = []
+    for q in q_variants:
+        if q not in all_queries:
+            all_queries.append(q)
+        q_lower = q.lower()
+        if "iit roorkee" in q_lower or "iitr" in q_lower:
+            alt_q = q.replace("IIT Roorkee", "the Institute").replace("IITR", "the Institute").replace("iit roorkee", "the Institute").replace("iitr", "the Institute")
+            if alt_q not in all_queries:
+                all_queries.append(alt_q)
+        elif "institute" in q_lower:
+            alt_q = q.replace("the Institute", "IIT Roorkee").replace("Institute", "IIT Roorkee").replace("the institute", "IIT Roorkee").replace("institute", "IIT Roorkee")
+            if alt_q not in all_queries:
+                all_queries.append(alt_q)
+
+    # Score candidates against all query variants, keeping the maximum score
     best_scores = [-999.0] * len(candidates)
-    for q in alt_queries:
+    for q in all_queries:
         pairs = [(q, c["chunk"]) for c in candidates]
         scores = cross_encoder.predict(pairs)
         for idx, score in enumerate(scores):
             best_scores[idx] = max(best_scores[idx], float(score))
 
+    # Check if query targets EPE / Extensive Professional Experience
+    q_lower = query.lower()
+    is_epe_query = "epe" in q_lower or "extensive" in q_lower or "professional experience" in q_lower
+
     # Attach scores and sort by relevance (highest first)
     for idx, candidate in enumerate(candidates):
-        candidate["rerank_score"] = best_scores[idx]
+        score = best_scores[idx]
+        chunk_lower = candidate["chunk"].lower()
+        # Heavy penalty if the chunk is about EPE but query is not
+        if not is_epe_query and ("professional experience" in chunk_lower or "epe" in chunk_lower):
+            score -= 10.0
+        candidate["rerank_score"] = score
 
     ranked = sorted(candidates, key=lambda x: x["rerank_score"], reverse=True)
     return ranked[:top_k]
@@ -105,9 +123,9 @@ def check_confidence(candidates):
     if not candidates:
         return False
 
-    # Use rerank_score — cross-encoder scores can be strongly negative, -10 is a safer cutoff
-    best_score = candidates[0].get("rerank_score", -20)
-    return best_score > -10
+    # Check the maximum score in the candidates list with a threshold of 1.0
+    best_score = max(c.get("rerank_score", -20) for c in candidates)
+    return best_score > 1.0
 
 
 def expand_context(candidates, chunks):

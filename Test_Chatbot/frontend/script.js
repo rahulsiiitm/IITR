@@ -7,7 +7,7 @@ const welcomeMessage = document.getElementById('welcomeMessage');
 
 let isProcessing = false;
 
-// Send message
+// Send message event
 inputForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const text = messageInput.value.trim();
@@ -15,14 +15,30 @@ inputForm.addEventListener('submit', (e) => {
   handleMessage(text);
 });
 
-// Clear chat
+// Clear chat event
 clearBtn.addEventListener('click', () => {
+  // Remove all message bubbles
   chatArea.querySelectorAll('.msg').forEach((el) => el.remove());
-  welcomeMessage.style.display = 'block';
+  // Show welcome screen
+  welcomeMessage.style.display = 'flex';
+});
+
+// Suggestion card clicks
+document.addEventListener('click', (e) => {
+  const card = e.target.closest('.suggestion-card');
+  if (card && !isProcessing) {
+    const question = card.getAttribute('data-question');
+    if (question) {
+      handleMessage(question);
+    }
+  }
 });
 
 function handleMessage(text) {
+  // Hide welcome message container
   welcomeMessage.style.display = 'none';
+  
+  // Add user bubble
   addMsg(text, 'user');
   messageInput.value = '';
 
@@ -35,9 +51,10 @@ function handleMessage(text) {
       loader.remove();
       addMsg(res.answer, 'bot', res.sources, res.debug);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error(err);
       loader.remove();
-      addMsg('Something went wrong. Please try again.', 'bot');
+      addMsg('Something went wrong while reaching the admission assistant. Please try again.', 'bot');
     })
     .finally(() => {
       isProcessing = false;
@@ -48,20 +65,47 @@ function handleMessage(text) {
 function addMsg(text, type, sources, debug) {
   const div = document.createElement('div');
   div.className = `msg ${type}`;
-  div.textContent = text;
 
+  if (type === 'user') {
+    div.textContent = text;
+  } else {
+    // Render Markdown for bot responses if marked.js is loaded
+    if (typeof marked !== 'undefined') {
+      // Configure marked options to preserve line breaks
+      marked.setOptions({
+        breaks: true,
+        gfm: true
+      });
+      div.innerHTML = marked.parse(text);
+    } else {
+      // Fallback
+      div.textContent = text;
+    }
+  }
+
+  // Render sources if available
   if (type === 'bot' && sources && sources.length) {
-    const src = document.createElement('div');
-    src.className = 'source';
-    src.textContent = '📄 Sources: Pages ' + sources.join(', ');
-    div.appendChild(src);
+    const sourceContainer = document.createElement('div');
+    sourceContainer.className = 'source-container';
+    
+    // Sort sources numerically
+    const sortedSources = [...sources].sort((a, b) => a - b);
+    
+    sortedSources.forEach(page => {
+      const pill = document.createElement('span');
+      pill.className = 'source-pill';
+      pill.innerHTML = `📄 Page ${page}`;
+      sourceContainer.appendChild(pill);
+    });
+    
+    div.appendChild(sourceContainer);
   }
 
   // Debug panel (collapsible)
   if (type === 'bot' && debug && debug.length) {
     const toggle = document.createElement('button');
     toggle.className = 'debug-toggle';
-    toggle.textContent = '▶ Show retrieved chunks';
+    toggle.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:4px;"><polyline points="9 18 15 12 9 6"/></svg> Show retrieved chunks`;
     
     const panel = document.createElement('div');
     panel.className = 'debug-panel';
@@ -73,18 +117,20 @@ function addMsg(text, type, sources, debug) {
       entry.innerHTML = `
         <div class="debug-header">
           <strong>Chunk ${i + 1}</strong>
-          <span class="debug-score">Score: ${item.rerank_score}</span>
+          <span class="debug-score">Score: ${item.rerank_score.toFixed(3)}</span>
           <span class="debug-page">Page ${item.page}</span>
         </div>
-        <div class="debug-text">${item.chunk}</div>
+        <div class="debug-text">${escapeHtml(item.chunk)}</div>
       `;
       panel.appendChild(entry);
     });
 
     toggle.addEventListener('click', () => {
-      const open = panel.style.display !== 'none';
-      panel.style.display = open ? 'none' : 'block';
-      toggle.textContent = open ? '▶ Show retrieved chunks' : '▼ Hide retrieved chunks';
+      const isOpen = panel.style.display !== 'none';
+      panel.style.display = isOpen ? 'none' : 'flex';
+      toggle.innerHTML = isOpen 
+        ? `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:4px;"><polyline points="9 18 15 12 9 6"/></svg> Show retrieved chunks` 
+        : `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:4px;"><polyline points="6 9 12 15 18 9"/></svg> Hide retrieved chunks`;
     });
 
     div.appendChild(toggle);
@@ -104,7 +150,16 @@ function addLoader() {
   return div;
 }
 
-// Backend call
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Backend call settings
 const API_BASE = 'http://localhost:5000';
 
 async function sendToBackend(question) {
@@ -113,6 +168,6 @@ async function sendToBackend(question) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question }),
   });
-  if (!res.ok) throw new Error('Failed');
+  if (!res.ok) throw new Error('Failed to reach backend API');
   return await res.json();
 }

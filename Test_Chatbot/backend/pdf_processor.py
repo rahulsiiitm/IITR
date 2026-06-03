@@ -32,7 +32,7 @@ def chunk_pages(pages):
     """
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
-        chunk_overlap=200,
+        chunk_overlap=250,
         separators=[
             "\n\n",
             "\n",
@@ -53,7 +53,6 @@ def chunk_pages(pages):
             chunks.append({
                 "chunk": chunk,
                 "page": page_num,
-                "full_page": text
             })
 
     return chunks
