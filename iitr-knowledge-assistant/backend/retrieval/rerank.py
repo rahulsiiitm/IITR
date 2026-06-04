@@ -87,12 +87,30 @@ def rerank(
     return ranked[:limit]
 
 
-def check_confidence(candidates: list[dict]) -> bool:
-    """Return True if best rerank score exceeds confidence threshold."""
+def check_confidence(candidates: list[dict], query: str = "") -> bool:
+    """Return True if best rerank score exceeds confidence threshold.
+
+    Procedural / process / how-to questions use a relaxed threshold because
+    the cross-encoder scores them lower even when the content is relevant.
+    """
     if not candidates:
         return False
     best_score = max(c.get("rerank_score", -20) for c in candidates)
-    return best_score > settings.confidence_threshold
+
+    # Relaxed threshold for vague procedural / informational questions
+    q = query.lower()
+    procedural_keywords = [
+        "step", "process", "procedure", "how", "what to do",
+        "after admission", "after joining", "joining",
+        "follow", "what should", "what must", "what does",
+        "guideline", "explain", "describe", "overview",
+    ]
+    if any(kw in q for kw in procedural_keywords):
+        threshold = -6.0  # relaxed: any semantically near-miss chunk is allowed
+    else:
+        threshold = settings.confidence_threshold
+
+    return best_score > threshold
 
 
 def expand_context(candidates: list[dict], chunks: list[dict]) -> list[dict]:

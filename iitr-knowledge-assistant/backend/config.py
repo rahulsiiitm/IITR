@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     rerank_top_k_multi: int = 8
     chunk_size: int = 1000
     chunk_overlap: int = 250
-    confidence_threshold: float = 1.0
+    confidence_threshold: float = -5.0
 
     api_port: int = 45123
 

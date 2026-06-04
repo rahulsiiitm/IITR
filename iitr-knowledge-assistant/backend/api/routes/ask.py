@@ -9,8 +9,11 @@ from backend.generation.llm import ask as generate_answer
 from backend.logging.analytics import RequestTimer, log_ask_request
 from backend.query.processor import retrieve_candidates, select_reranked_per_page
 from backend.query.shortcuts import (
+    check_acronym_shortcut,
+    check_candidacy_cgpa_shortcut,
     check_cgpa_gate_shortcut,
     check_greeting,
+    check_patent_shortcut,
     check_vague_requirements,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
@@ -73,11 +76,32 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
     if vague:
         return AskResponse(answer=vague, sources=[])
 
+    acronym = check_acronym_shortcut(question)
+    if acronym:
+        return AskResponse(
+            answer=acronym["answer"],
+            sources=[SourceItem(**s) for s in acronym["sources"]],
+        )
+
     shortcut = check_cgpa_gate_shortcut(question)
     if shortcut:
         return AskResponse(
             answer=shortcut["answer"],
             sources=[SourceItem(**s) for s in shortcut["sources"]],
+        )
+
+    candidacy_shortcut = check_candidacy_cgpa_shortcut(question)
+    if candidacy_shortcut:
+        return AskResponse(
+            answer=candidacy_shortcut["answer"],
+            sources=[SourceItem(**s) for s in candidacy_shortcut["sources"]],
+        )
+
+    patent = check_patent_shortcut(question)
+    if patent:
+        return AskResponse(
+            answer=patent["answer"],
+            sources=[SourceItem(**s) for s in patent["sources"]],
         )
 
     index, chunks = _get_index_state(request)
@@ -86,7 +110,7 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
         candidates = retrieve_candidates(question, index, chunks)
         reranked, reranked_raw = select_reranked_per_page(question, candidates)
         expanded = expand_context(reranked, chunks)
-        is_confident = check_confidence(expanded)
+        is_confident = check_confidence(expanded, question)
 
         log_ask_request(
             question=question,

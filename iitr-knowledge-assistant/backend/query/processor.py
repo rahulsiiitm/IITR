@@ -7,6 +7,17 @@ QUERY_EXPANSIONS = {
     "candidacy": "coursework comprehensive examination research proposal obtaining candidacy",
     "thesis submission": "thesis submission final src examiner thesis",
     "gate exemption": "gate exempted national level test",
+    "patent": "patent filed published thesis work equivalent published paper peer reviewed journal",
+    "publication": "publication paper peer reviewed journal thesis work patent equivalent",
+    # Post-admission / joining process → R.2 (pages 23-24)
+    "after admission": "joining process supervisor SRC registration report head department",
+    "steps after": "joining process supervisor SRC registration report head department",
+    "after joining": "joining process supervisor SRC registration report head department",
+    "first step": "joining process supervisor SRC registration report head department",
+    "what to do": "joining process supervisor SRC registration report head department",
+    "process after": "joining process supervisor SRC registration report head department",
+    "steps to follow": "joining process supervisor SRC registration report head department",
+    "joining": "joining process supervisor SRC registration report head department",
 }
 
 
@@ -101,6 +112,9 @@ def select_reranked_per_page(
     seen_pages: set[int] = set()
     for c in reranked_raw:
         if c["page"] not in seen_pages:
+            # Drop subsequent candidates with scores below the confidence threshold to filter out noise
+            if len(selected) > 0 and c.get("rerank_score", 0) < settings.confidence_threshold:
+                continue
             selected.append(c)
             seen_pages.add(c["page"])
 
