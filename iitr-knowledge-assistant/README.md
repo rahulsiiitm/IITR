@@ -39,26 +39,30 @@ Build the search index:
 python scripts/build_index.py
 ```
 
-Start the API:
+Start the API (from the project root — you are likely already in `iitr-knowledge-assistant`):
 
 ```bash
-uvicorn backend.main:app --reload --port 8000
+source venv/bin/activate
+chmod +x scripts/run_server.sh
+./scripts/run_server.sh
 ```
 
-Serve the frontend (any static file server), e.g.:
+The script picks a free port (default **45123**) and updates `frontend/api-config.js` so the chat UI connects automatically. **Do not use 8000, 8001, 8765, or 17341** — Cursor IDE often binds those when you try to start a server.
 
-```bash
-cd frontend && python -m http.server 8080
-```
+If the API is **already running**, the script prints that URL instead of starting a duplicate.
 
-Open `http://localhost:8080` in your browser.
+If you see **“Address already in use”**: Cursor auto-forwards ports it sees in your terminal (45123, 52000, etc.) and blocks uvicorn. The launcher now uses **port 0** (OS picks a random free port). Run `pkill -f "uvicorn backend.main"` then `./scripts/run_server.sh` and open the URL it prints. Forward **that** port in Cursor Ports (SSH remote).
+
+Open the URL printed by `run_server.sh` (e.g. **http://127.0.0.1:45123/**) — the chat UI and API share that port.
+
+**SSH / Cursor remote:** Forward that one port in the Ports panel, then open the forwarded URL in your browser. Do not use a separate `http.server` on 8080 unless you know how to forward both ports.
 
 ## API
 
 ### POST /ask
 
 ```bash
-curl -X POST http://localhost:8000/ask \
+curl -X POST http://localhost:45123/ask \
   -H "Content-Type: application/json" \
   -d '{"question": "What is the maximum duration of PhD?"}'
 ```

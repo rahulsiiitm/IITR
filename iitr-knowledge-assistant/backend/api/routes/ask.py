@@ -8,7 +8,11 @@ from backend.config import settings
 from backend.generation.llm import ask as generate_answer
 from backend.logging.analytics import RequestTimer, log_ask_request
 from backend.query.processor import retrieve_candidates, select_reranked_per_page
-from backend.query.shortcuts import check_cgpa_gate_shortcut, check_vague_requirements
+from backend.query.shortcuts import (
+    check_cgpa_gate_shortcut,
+    check_greeting,
+    check_vague_requirements,
+)
 from backend.retrieval.rerank import check_confidence, expand_context
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,13 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
         raise HTTPException(status_code=400, detail="No question provided")
 
     timer = RequestTimer()
+
+    greeting = check_greeting(question)
+    if greeting:
+        return AskResponse(
+            answer=greeting["answer"],
+            sources=[SourceItem(**s) for s in greeting["sources"]],
+        )
 
     vague = check_vague_requirements(question)
     if vague:

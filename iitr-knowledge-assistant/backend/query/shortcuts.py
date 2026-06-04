@@ -1,5 +1,21 @@
 import re
 
+GREETINGS = {"hi", "hello", "hey", "hii", "hiii", "yo", "sup", "greetings"}
+
+
+def check_greeting(question: str) -> dict | None:
+    """Return a friendly reply for simple greetings (no LLM call)."""
+    if question.strip().lower().rstrip("!., ") in GREETINGS:
+        return {
+            "answer": (
+                "Hello! I'm the IIT Roorkee Knowledge Assistant. "
+                "Ask me anything about PhD regulations — eligibility, GATE exemption, "
+                "coursework, candidacy, thesis submission, and more."
+            ),
+            "sources": [],
+        }
+    return None
+
 
 VAGUE_REQUIREMENTS = {
     "what are the requirements",

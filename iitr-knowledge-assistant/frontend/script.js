@@ -44,7 +44,11 @@ function handleMessage(text) {
     .catch((err) => {
       console.error(err);
       loader.remove();
-      addMsg('Something went wrong while reaching the knowledge assistant. Please try again.', 'bot');
+      addMsg(
+        err.message ||
+          'Something went wrong while reaching the knowledge assistant. Please try again.',
+        'bot'
+      );
     })
     .finally(() => {
       isProcessing = false;
@@ -137,17 +141,29 @@ function escapeHtml(unsafe) {
     .replace(/'/g, '&#039;');
 }
 
-const API_BASE = 'http://localhost:8000';
+// Same-origin when UI is served by FastAPI (recommended, especially over SSH remote)
+const API_BASE = window.API_SAME_ORIGIN
+  ? window.location.origin
+  : `http://${window.location.hostname}:${window.API_PORT || 52000}`;
 
 async function sendToBackend(question) {
-  const res = await fetch(`${API_BASE}/ask`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+  } catch (err) {
+    throw new Error(
+      `Cannot reach the API at ${API_BASE}. Run ./scripts/run_server.sh and open the URL it prints (not a separate port).`
+    );
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || 'Failed to reach backend API');
+    const detail = err.detail;
+    const msg = typeof detail === 'string' ? detail : JSON.stringify(detail) || res.statusText;
+    throw new Error(msg || 'Failed to reach backend API');
   }
   return await res.json();
 }

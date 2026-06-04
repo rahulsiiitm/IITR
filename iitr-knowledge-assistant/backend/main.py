@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from backend.api.routes.ask import router as ask_router
-from backend.config import settings
+from backend.config import PROJECT_ROOT, settings
 from backend.indexing.build_index import load_index
 from backend.logging.analytics import setup_logging
 
@@ -62,3 +64,43 @@ def health():
         "rerank_model": settings.rerank_model,
         "llm_model": settings.ollama_model,
     }
+
+
+# Serve chat UI on the same port (explicit routes — root StaticFiles breaks POST /ask)
+_frontend_dir = PROJECT_ROOT / "frontend"
+_FRONTEND_FILES = ("index.html", "script.js", "style.css", "api-config.js")
+
+
+def _serve_frontend_file(name: str):
+    path = _frontend_dir / name
+    if not path.is_file():
+        from fastapi import HTTPException
+
+        raise HTTPException(status_code=404, detail=f"{name} not found")
+    return FileResponse(path)
+
+
+if _frontend_dir.is_dir():
+
+    @app.get("/")
+    def serve_index():
+        return _serve_frontend_file("index.html")
+
+    for _name in _FRONTEND_FILES:
+        if _name == "index.html":
+            continue
+
+        def _make_handler(filename: str):
+            def handler():
+                return _serve_frontend_file(filename)
+
+            return handler
+
+        app.get(f"/{_name}")(_make_handler(_name))
+
+    @app.get("/ask")
+    def ask_get_hint():
+        """Browser may open /ask via GET — only POST is valid for questions."""
+        from fastapi.responses import RedirectResponse
+
+        return RedirectResponse(url="/", status_code=302)
