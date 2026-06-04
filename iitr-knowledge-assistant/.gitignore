@@ -1,0 +1,9 @@
+venv/
+.env
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+vector_db/indexes/
+vector_db/metadata/
+*.log
