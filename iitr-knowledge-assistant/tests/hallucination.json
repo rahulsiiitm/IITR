@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What is the hostel fee for 2027?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is the placement percentage?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is the average package?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "Who is the current Dean?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is IIT Roorkee's NIRF ranking?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "How many students are enrolled at IIT Roorkee?",
+    "expect_type": "unavailable"
+  }
+]

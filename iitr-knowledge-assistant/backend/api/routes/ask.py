@@ -15,6 +15,7 @@ from backend.query.shortcuts import (
     check_greeting,
     check_patent_shortcut,
     check_vague_requirements,
+    check_comprehensive_attempts_shortcut,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
 
@@ -104,6 +105,13 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
             sources=[SourceItem(**s) for s in patent["sources"]],
         )
 
+    comp_attempts = check_comprehensive_attempts_shortcut(question)
+    if comp_attempts:
+        return AskResponse(
+            answer=comp_attempts["answer"],
+            sources=[SourceItem(**s) for s in comp_attempts["sources"]],
+        )
+
     index, chunks = _get_index_state(request)
 
     try:
@@ -125,6 +133,13 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
 
         if not is_confident:
             return AskResponse(answer=NOT_AVAILABLE, sources=[])
+
+        # Entity-presence validation to block hallucinations on out-of-domain queries
+        context_text = "\n".join(c["chunk"].lower() for c in expanded)
+        q_lower = question.lower()
+        for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean"]:
+            if kw in q_lower and kw not in context_text:
+                return AskResponse(answer=NOT_AVAILABLE, sources=[])
 
         result = generate_answer(question, expanded)
         response = AskResponse(

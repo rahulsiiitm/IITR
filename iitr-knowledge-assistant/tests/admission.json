@@ -1,0 +1,34 @@
+[
+  {
+    "question": "What is the minimum percentage required?",
+    "expect_type": "answer",
+    "must_contain": ["60%"],
+    "must_not_contain": ["7.00"]
+  },
+  {
+    "question": "What is the minimum CGPA required?",
+    "expect_type": "answer",
+    "must_contain": ["6.0"],
+    "must_not_contain": ["7.00"]
+  },
+  {
+    "question": "Can B.Tech students apply?",
+    "expect_type": "answer",
+    "must_contain": ["apply"]
+  },
+  {
+    "question": "Can M.Tech students apply?",
+    "expect_type": "answer",
+    "must_contain": ["apply"]
+  },
+  {
+    "question": "Can MBBS students apply?",
+    "expect_type": "answer",
+    "must_contain": ["MBBS"]
+  },
+  {
+    "question": "Who is eligible for direct PhD admission?",
+    "expect_type": "answer",
+    "must_contain": ["bachelor", "8.0"]
+  }
+]

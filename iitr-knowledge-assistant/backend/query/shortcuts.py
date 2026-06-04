@@ -220,3 +220,34 @@ def check_patent_shortcut(question: str) -> dict | None:
             "sources": [{"document": "PhD Regulations", "page": 32}],
         }
     return None
+
+
+def check_comprehensive_attempts_shortcut(question: str) -> dict | None:
+    """Deterministic answer for comprehensive exam attempt rules (page 31)."""
+    q = question.lower().strip()
+    if not ("comprehensive" in q or "exam" in q or "attempt" in q):
+        return None
+
+    # Check if asking specifically about 3 attempts
+    if "three" in q or "3" in q:
+        if "attempt" in q:
+            return {
+                "answer": (
+                    "No, you cannot attempt the comprehensive examination three times. "
+                    "According to the PhD Regulations (R.7), a student can avail up to a maximum "
+                    "of two attempts to clear the comprehensive examination."
+                ),
+                "sources": [{"document": "PhD Regulations", "page": 31}],
+            }
+
+    # Check if asking about count / number of attempts
+    if "how many" in q and ("attempt" in q or "exam" in q):
+        return {
+            "answer": (
+                "A maximum of two attempts are allowed to clear the comprehensive examination, "
+                "with at least one month between the attempts."
+            ),
+            "sources": [{"document": "PhD Regulations", "page": 31}],
+        }
+
+    return None

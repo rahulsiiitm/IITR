@@ -18,6 +18,15 @@ QUERY_EXPANSIONS = {
     "process after": "joining process supervisor SRC registration report head department",
     "steps to follow": "joining process supervisor SRC registration report head department",
     "joining": "joining process supervisor SRC registration report head department",
+    # Admission qualifications (Page 15)
+    "minimum cgpa": "minimum qualifications admission eligibility criteria qualifying degree",
+    "cgpa required": "minimum qualifications admission eligibility criteria qualifying degree",
+    "percentage required": "minimum qualifications admission eligibility criteria qualifying degree",
+    "eligible for direct": "minimum qualifications admission eligibility criteria qualifying degree gate exemption",
+    "direct phd": "minimum qualifications admission eligibility criteria qualifying degree gate exemption",
+    # Working period / thesis submission duration (Page 34)
+    "working period": "minimum working period thesis submission candidacy duration R.8",
+    "minimum working": "minimum working period thesis submission candidacy duration R.8",
 }
 
 
@@ -96,7 +105,7 @@ def select_reranked_per_page(
     question: str,
     candidates: list[dict],
 ) -> tuple[list[dict], list[dict]]:
-    """Rerank all candidates and keep best chunk per page."""
+    """Rerank all candidates and keep best chunks (allowing multiple per page)."""
     from backend.retrieval.rerank import rerank
 
     sub_questions = split_sub_questions(question)
@@ -109,13 +118,10 @@ def select_reranked_per_page(
     reranked_raw = rerank(question, candidates, top_k=len(candidates))
 
     selected: list[dict] = []
-    seen_pages: set[int] = set()
     for c in reranked_raw:
-        if c["page"] not in seen_pages:
-            # Drop subsequent candidates with scores below the confidence threshold to filter out noise
-            if len(selected) > 0 and c.get("rerank_score", 0) < settings.confidence_threshold:
-                continue
-            selected.append(c)
-            seen_pages.add(c["page"])
+        # Drop subsequent candidates with scores below the confidence threshold to filter out noise
+        if len(selected) > 0 and c.get("rerank_score", 0) < settings.confidence_threshold:
+            continue
+        selected.append(c)
 
     return selected[:k_val], reranked_raw

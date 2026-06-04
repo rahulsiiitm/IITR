@@ -1,0 +1,37 @@
+[
+  {
+    "question": "What are the candidacy requirements?",
+    "expect_type": "answer",
+    "must_contain": ["course", "comprehensive", "proposal"]
+  },
+  {
+    "question": "What CGPA is required for candidacy?",
+    "expect_type": "answer",
+    "must_contain": ["7.0"]
+  },
+  {
+    "question": "What must be completed before candidacy?",
+    "expect_type": "answer",
+    "must_contain": ["course", "comprehensive"]
+  },
+  {
+    "question": "How many comprehensive examination attempts are allowed?",
+    "expect_type": "answer",
+    "must_contain": ["two", "attempts"]
+  },
+  {
+    "question": "Can I attempt it three times?",
+    "expect_type": "answer",
+    "must_contain": ["no", "two attempts"]
+  },
+  {
+    "question": "What is the minimum gap between attempts?",
+    "expect_type": "answer",
+    "must_contain": ["month"]
+  },
+  {
+    "question": "Who defines the syllabus for comprehensive examination?",
+    "expect_type": "answer",
+    "must_contain": ["SRC"]
+  }
+]

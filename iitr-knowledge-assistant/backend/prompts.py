@@ -145,7 +145,7 @@ Note: The user is asking if they NEED a national level test (like GATE) or if it
 - If the regulations exempt them, answer "No, you do not need GATE / GATE is not required."
 - If the regulations do not exempt them, answer "Yes, you need GATE / GATE is required."
 - Pay close attention to this logical negation."""
-    elif "exempt" in q_lower:
+    elif "exempt" in q_lower and (any(w in q_lower for w in ["i ", "my", "me", "am i", "eligible"]) or has_number):
         prompt += """
 
 Note: The user is asking if they qualify for an EXEMPTION.

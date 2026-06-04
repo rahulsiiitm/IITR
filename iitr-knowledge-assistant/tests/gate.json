@@ -1,0 +1,37 @@
+[
+  {
+    "question": "Do IIT graduates need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["no", "exempt"]
+  },
+  {
+    "question": "What CGPA is required for GATE exemption?",
+    "expect_type": "answer",
+    "must_contain": ["8.0", "exempt"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 7.99. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["yes", "need GATE", "7.99"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 8.0. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["no", "do not need", "exempt"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 8.01. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["no", "do not need", "exempt"]
+  },
+  {
+    "question": "Can CSIR-NET be used?",
+    "expect_type": "answer",
+    "must_contain": ["yes", "CSIR-NET"]
+  },
+  {
+    "question": "Can UGC-NET be used?",
+    "expect_type": "answer",
+    "must_contain": ["yes", "UGC-NET"]
+  }
+]

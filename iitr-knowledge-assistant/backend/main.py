@@ -25,6 +25,11 @@ async def lifespan(app: FastAPI):
         app.state.chunks = chunks
         app.state.index_loaded = True
         logger.info("Index loaded: %d chunks", len(chunks))
+
+        # Pre-initialize BM25 index
+        from backend.retrieval.bm25 import get_bm25_index
+        get_bm25_index(chunks)
+        logger.info("BM25 index initialized successfully")
     except FileNotFoundError as exc:
         app.state.faiss_index = None
         app.state.chunks = None

@@ -1,0 +1,27 @@
+[
+  {
+    "question": "What are the thesis submission requirements?",
+    "expect_type": "answer",
+    "must_contain": ["synopsis", "thesis"]
+  },
+  {
+    "question": "What is the minimum working period after candidacy for a full-time student?",
+    "expect_type": "answer",
+    "must_contain": ["2", "year"]
+  },
+  {
+    "question": "In what language must the thesis be written?",
+    "expect_type": "answer",
+    "must_contain": ["English"]
+  },
+  {
+    "question": "What happens after thesis submission?",
+    "expect_type": "answer",
+    "must_contain": ["evaluat", "examiner", "viva"]
+  },
+  {
+    "question": "What is the oral defense process?",
+    "expect_type": "answer",
+    "must_contain": ["viva", "defense", "examiner"]
+  }
+]

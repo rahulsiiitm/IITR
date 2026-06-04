@@ -16,25 +16,61 @@ def get_encoder() -> SentenceTransformer:
     return _encoder
 
 
+def reciprocal_rank_fusion(
+    dense_results: list[dict],
+    sparse_results: list[dict],
+    k: int = 60,
+    top_n: int = 20,
+) -> list[dict]:
+    """Combine dense and sparse search results using Reciprocal Rank Fusion (RRF)."""
+    rrf_scores = {}
+    chunk_lookup = {}
+
+    for rank, item in enumerate(dense_results, start=1):
+        key = (item["page"], item["index"])
+        chunk_lookup[key] = item
+        rrf_scores[key] = rrf_scores.get(key, 0.0) + (1.0 / (k + rank))
+
+    for rank, item in enumerate(sparse_results, start=1):
+        key = (item["page"], item["index"])
+        if key not in chunk_lookup:
+            chunk_lookup[key] = item
+        else:
+            chunk_lookup[key]["bm25_score"] = item.get("bm25_score")
+        rrf_scores[key] = rrf_scores.get(key, 0.0) + (1.0 / (k + rank))
+
+    sorted_keys = sorted(rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True)
+
+    fused = []
+    for key in sorted_keys[:top_n]:
+        item = chunk_lookup[key].copy()
+        item["rrf_score"] = rrf_scores[key]
+        fused.append(item)
+
+    return fused
+
+
 def search(
     query: str,
     index: faiss.IndexFlatL2,
     chunks: list[dict],
     top_k: int | None = None,
 ) -> list[dict]:
-    """Retrieve top-k chunks via FAISS L2 search."""
-    k = top_k or settings.top_k
-    prefixed_query = query if query.startswith(BGE_QUERY_PREFIX) else f"{BGE_QUERY_PREFIX}{query}"
+    """Retrieve candidate chunks using hybrid dense (FAISS) and sparse (BM25) search with RRF."""
+    k_target = top_k or settings.top_k
+    k_fetch = k_target * 2
 
+    # 1. Dense Search (FAISS)
+    prefixed_query = query if query.startswith(BGE_QUERY_PREFIX) else f"{BGE_QUERY_PREFIX}{query}"
     encoder = get_encoder()
     query_embedding = encoder.encode([prefixed_query]).astype("float32")
-    distances, indices = index.search(query_embedding, k)
+    distances, indices = index.search(query_embedding, k_fetch)
 
-    results: list[dict] = []
+    dense_results = []
     for i, idx in enumerate(indices[0]):
         if idx < len(chunks):
             chunk = chunks[idx]
-            results.append(
+            dense_results.append(
                 {
                     "chunk_id": chunk["chunk_id"],
                     "chunk": chunk["text"],
@@ -46,4 +82,16 @@ def search(
                 }
             )
 
-    return results
+    # 2. Sparse Search (BM25)
+    from backend.retrieval.bm25 import search_bm25
+    sparse_results = search_bm25(query, chunks, top_k=k_fetch)
+
+    # 3. Reciprocal Rank Fusion
+    fused_results = reciprocal_rank_fusion(
+        dense_results=dense_results,
+        sparse_results=sparse_results,
+        k=60,
+        top_n=k_target
+    )
+
+    return fused_results
