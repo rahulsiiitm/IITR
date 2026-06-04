@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  assistant:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "45123:45123"
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
+      - RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
+      - OLLAMA_MODEL=mistral:latest
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/app/data
+      - ./vector_db:/app/vector_db
+    restart: always

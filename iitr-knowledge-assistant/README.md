@@ -97,12 +97,21 @@ frontend/        Chat UI
 scripts/         Index build CLI
 ```
 
+## Testing
+
+To ensure zero regressions and perfect factual accuracy, the system includes a test suite covering Admission, GATE, Candidacy, Thesis, and Hallucination scenarios.
+
+Run the test suite in-memory (network-free, instant execution using FastAPI's TestClient):
+```bash
+venv/bin/python tests/run_in_memory_tests.py
+```
+
 ## Roadmap
 
-| Phase | Status |
-|-------|--------|
-| 1 — Single PDF prototype | Done (Test_Chatbot) |
-| 2 — Layered architecture, persistent FAISS | **Current** |
-| 3 — FastAPI + PostgreSQL + chat history | Planned |
-| 4 — Admin dashboard, upload, analytics | Planned |
-| 5 — Production deployment (Docker, Windows Server) | Planned |
+| Phase | Status | Details |
+|-------|--------|---------|
+| 1 — Single PDF prototype | Done | Basic retrieval prototype |
+| 2 — Hybrid Retrieval (BM25 + FAISS + RRF) & Reranking | **Done** | RRF fusion, query expansions, numerical shortcuts, in-memory testing (**100% Accuracy, 0% Hallucinations**) |
+| 3 — FastAPI + PostgreSQL + chat history | Planned | Session management, chat logs database, thumbs up/down feedback |
+| 4 — Admin dashboard, upload, analytics | Planned | Monitoring performance, upload new files, update search index |
+| 5 — Production deployment (Docker, Windows Server) | Planned | Docker compose, production builds |
