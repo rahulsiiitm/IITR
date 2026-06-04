@@ -33,5 +33,28 @@
     "question": "Can UGC-NET be used?",
     "expect_type": "answer",
     "must_contain": ["yes", "UGC-NET"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 7.999. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["yes"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 8.000. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["no"]
+  },
+  {
+    "question": "I graduated from IIT with CGPA 8.001. Do I need GATE?",
+    "expect_type": "answer",
+    "must_contain": ["no"]
+  },
+  {
+    "question": "Can CEED be used?",
+    "expect_type": "answer"
+  },
+  {
+    "question": "Can JEST be used?",
+    "expect_type": "answer"
   }
 ]

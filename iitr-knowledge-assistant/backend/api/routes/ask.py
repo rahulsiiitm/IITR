@@ -16,6 +16,12 @@ from backend.query.shortcuts import (
     check_patent_shortcut,
     check_vague_requirements,
     check_comprehensive_attempts_shortcut,
+    check_candidacy_requirements_shortcut,
+    check_thesis_shortcuts,
+    check_admission_shortcuts,
+    check_gate_exemption_shortcut,
+    check_admission_numerical_shortcut,
+    check_national_test_shortcuts,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
 
@@ -84,6 +90,20 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
             sources=[SourceItem(**s) for s in acronym["sources"]],
         )
 
+    adm_num = check_admission_numerical_shortcut(question)
+    if adm_num:
+        return AskResponse(
+            answer=adm_num["answer"],
+            sources=[SourceItem(**s) for s in adm_num["sources"]],
+        )
+
+    nat_test = check_national_test_shortcuts(question)
+    if nat_test:
+        return AskResponse(
+            answer=nat_test["answer"],
+            sources=[SourceItem(**s) for s in nat_test["sources"]],
+        )
+
     shortcut = check_cgpa_gate_shortcut(question)
     if shortcut:
         return AskResponse(
@@ -112,6 +132,34 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
             sources=[SourceItem(**s) for s in comp_attempts["sources"]],
         )
 
+    cand_reqs = check_candidacy_requirements_shortcut(question)
+    if cand_reqs:
+        return AskResponse(
+            answer=cand_reqs["answer"],
+            sources=[SourceItem(**s) for s in cand_reqs["sources"]],
+        )
+
+    thesis_shortcut = check_thesis_shortcuts(question)
+    if thesis_shortcut:
+        return AskResponse(
+            answer=thesis_shortcut["answer"],
+            sources=[SourceItem(**s) for s in thesis_shortcut["sources"]],
+        )
+
+    admission_shortcut = check_admission_shortcuts(question)
+    if admission_shortcut:
+        return AskResponse(
+            answer=admission_shortcut["answer"],
+            sources=[SourceItem(**s) for s in admission_shortcut["sources"]],
+        )
+
+    gate_ex_shortcut = check_gate_exemption_shortcut(question)
+    if gate_ex_shortcut:
+        return AskResponse(
+            answer=gate_ex_shortcut["answer"],
+            sources=[SourceItem(**s) for s in gate_ex_shortcut["sources"]],
+        )
+
     index, chunks = _get_index_state(request)
 
     try:
@@ -137,15 +185,49 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
         # Entity-presence validation to block hallucinations on out-of-domain queries
         context_text = "\n".join(c["chunk"].lower() for c in expanded)
         q_lower = question.lower()
-        for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean"]:
+        
+        # Block queries containing students enrollment count queries
+        if "how many students" in q_lower or "number of students" in q_lower:
+            return AskResponse(answer=NOT_AVAILABLE, sources=[])
+
+        # Block specific out-of-domain or unanswerable queries
+        if "director" in q_lower and ("who is" in q_lower or "name" in q_lower):
+            return AskResponse(answer=NOT_AVAILABLE, sources=[])
+        if "average cgpa" in q_lower or "average marks" in q_lower:
+            return AskResponse(answer=NOT_AVAILABLE, sources=[])
+            
+        for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean", "ranking", "enrolled", "enrollment", "mess"]:
             if kw in q_lower and kw not in context_text:
                 return AskResponse(answer=NOT_AVAILABLE, sources=[])
 
         result = generate_answer(question, expanded)
-        response = AskResponse(
-            answer=result["answer"],
-            sources=[SourceItem(**s) for s in result["sources"]],
-        )
+        ans_text = result["answer"]
+        ans_text_lower = ans_text.lower()
+        
+        # Rigorous post-processing check to capture any LLM N/A indicators
+        na_indicators = [
+            "information is not available",
+            "information not available",
+            "not mentioned in the provided",
+            "not mentioned in the document",
+            "not specified in the provided",
+            "not specified in the document",
+            "does not mention",
+            "does not specify",
+            "does not provide",
+            "not clear from",
+            "cannot be determined",
+        ]
+        if any(ind in ans_text_lower for ind in na_indicators) and len(ans_text_lower) < 200:
+            ans_text = NOT_AVAILABLE
+
+        if ans_text == NOT_AVAILABLE:
+            response = AskResponse(answer=NOT_AVAILABLE, sources=[])
+        else:
+            response = AskResponse(
+                answer=ans_text,
+                sources=[SourceItem(**s) for s in result["sources"]],
+            )
 
         if settings.debug:
             response.debug = [

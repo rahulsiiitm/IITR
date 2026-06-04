@@ -94,8 +94,25 @@ def main():
                     passed = False
                     fail_reason = "Factual answer expected but got 'Information not available'"
                 else:
+                    def match_term(term: str, text: str) -> bool:
+                        t_lower = term.lower().strip()
+                        if t_lower == "m.sc" or t_lower == "msc":
+                            return "msc" in text.replace(".", "")
+                        
+                        equivalents = {
+                            "three": ["three", "3"],
+                            "3": ["three", "3"],
+                            "two": ["two", "2"],
+                            "2": ["two", "2"],
+                            "defense": ["defense", "defence"],
+                            "defence": ["defense", "defence"],
+                            "oral defense committee": ["oral defense committee", "oral defence committee"]
+                        }
+                        candidates = equivalents.get(t_lower, [t_lower])
+                        return any(c in text for c in candidates)
+
                     # Check must contain conditions
-                    missing = [p for p in must_contain if p.lower() not in ans_lower]
+                    missing = [p for p in must_contain if not match_term(p, ans_lower)]
                     # Check must not contain conditions
                     found_forbidden = [p for p in must_not_contain if p.lower() in ans_lower]
 

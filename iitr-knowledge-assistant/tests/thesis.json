@@ -23,5 +23,30 @@
     "question": "What is the oral defense process?",
     "expect_type": "answer",
     "must_contain": ["viva", "defense", "examiner"]
+  },
+  {
+    "question": "How many examiners evaluate the thesis?",
+    "expect_type": "answer",
+    "must_contain": ["three"]
+  },
+  {
+    "question": "How many examiners must recommend acceptance?",
+    "expect_type": "answer",
+    "must_contain": ["two"]
+  },
+  {
+    "question": "What is ODC?",
+    "expect_type": "answer",
+    "must_contain": ["Oral Defense Committee"]
+  },
+  {
+    "question": "When must the thesis be submitted after synopsis?",
+    "expect_type": "answer",
+    "must_contain": ["four months"]
+  },
+  {
+    "question": "What is the maximum extension allowed after synopsis submission?",
+    "expect_type": "answer",
+    "must_contain": ["8 months"]
   }
 ]

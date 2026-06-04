@@ -22,5 +22,37 @@
   {
     "question": "How many students are enrolled at IIT Roorkee?",
     "expect_type": "unavailable"
+  },
+  {
+    "question": "What is IIT Roorkee's placement percentage?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is IIT Roorkee's average package?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "Who is the Director of IIT Roorkee?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is IIT Roorkee's NIRF ranking?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is the hostel fee?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "How many students are enrolled?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is the mess fee?",
+    "expect_type": "unavailable"
+  },
+  {
+    "question": "What is the average CGPA of admitted students?",
+    "expect_type": "unavailable"
   }
 ]

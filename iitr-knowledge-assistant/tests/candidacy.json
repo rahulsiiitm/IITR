@@ -33,5 +33,29 @@
     "question": "Who defines the syllabus for comprehensive examination?",
     "expect_type": "answer",
     "must_contain": ["SRC"]
+  },
+  {
+    "question": "What are the three requirements for obtaining candidacy?",
+    "expect_type": "answer",
+    "must_contain": ["proposal", "comprehensive", "7.00"]
+  },
+  {
+    "question": "Who approves the research proposal?",
+    "expect_type": "answer",
+    "must_contain": ["SRC"]
+  },
+  {
+    "question": "What happens if I fail the comprehensive examination?",
+    "expect_type": "answer"
+  },
+  {
+    "question": "Can the comprehensive examination be attempted twice?",
+    "expect_type": "answer",
+    "must_contain": ["yes"]
+  },
+  {
+    "question": "Can the comprehensive examination be attempted three times?",
+    "expect_type": "answer",
+    "must_contain": ["no"]
   }
 ]

@@ -30,5 +30,38 @@
     "question": "Who is eligible for direct PhD admission?",
     "expect_type": "answer",
     "must_contain": ["bachelor", "8.0"]
+  },
+  {
+    "question": "Can MSc students apply?",
+    "expect_type": "answer",
+    "must_contain": ["msc"]
+  },
+  {
+    "question": "Can MA students apply?",
+    "expect_type": "answer"
+  },
+  {
+    "question": "Can MBA students apply?",
+    "expect_type": "answer"
+  },
+  {
+    "question": "Can a candidate with 59.9% apply?",
+    "expect_type": "answer",
+    "must_contain": ["no"]
+  },
+  {
+    "question": "Can a candidate with 60% apply?",
+    "expect_type": "answer",
+    "must_contain": ["yes"]
+  },
+  {
+    "question": "Can a candidate with CGPA 5.99 apply?",
+    "expect_type": "answer",
+    "must_contain": ["no"]
+  },
+  {
+    "question": "Can a candidate with CGPA 6.0 apply?",
+    "expect_type": "answer",
+    "must_contain": ["yes"]
   }
 ]
