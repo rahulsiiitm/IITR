@@ -1,0 +1,53 @@
+[
+  {
+    "question": "I have CGPA 7.99 from IIT. Do I need GATE and what candidacy CGPA is required?",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "I have CGPA 8.0 from IIT. Do I need GATE and what coursework requirements apply?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Describe the complete academic journey from admission to degree award.",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Compare candidacy requirements and thesis submission requirements.",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What must a student complete before candidacy and before thesis submission?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "I have accumulated 12 unsatisfactory units. What happens?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can a student with CGPA 6.0 apply and what CGPA is needed later for candidacy?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "What are all requirements from admission until oral defense?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Explain the complete thesis evaluation process.",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

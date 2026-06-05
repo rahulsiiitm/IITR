@@ -1,0 +1,107 @@
+[
+  {
+    "question": "Can I apply with 59.99%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "Can I apply with 60%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 60.01%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 5.99?",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "Can I apply with 6.0?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 6.01?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 6.99?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 7.0?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 7.01?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 7.99?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 8.0?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 8.01?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 7.999?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 8.000?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 8.001?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  }
+]

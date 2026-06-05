@@ -1,0 +1,54 @@
+[
+  {
+    "question": "What percentage is required?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What CGPA is required?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can I apply with 59%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "Can I apply with 60%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 60.1%?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 5.99 CGPA?",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "Can I apply with 6.0 CGPA?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "Can I apply with 6.01 CGPA?",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  }
+]

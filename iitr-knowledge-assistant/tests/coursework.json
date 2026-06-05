@@ -1,0 +1,37 @@
+[
+  {
+    "question": "What coursework is required?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "How many credits are required?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is the minimum coursework CGPA?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can NPTEL courses be counted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can self-study courses be counted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "How many self-study courses are allowed?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "How many seminar credits are required?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

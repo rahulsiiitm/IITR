@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is academic registration?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "How often must a student register?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can registration lapse?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "When does registration begin?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

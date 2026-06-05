@@ -1,26 +1,26 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "How many examiners evaluate the thesis?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "Who selects the examiners?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "How many examiners must recommend acceptance?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "What happens if one examiner rejects?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "What happens if two examiners reject?",
     "expect_type": "answer",
     "must_contain": []
   }

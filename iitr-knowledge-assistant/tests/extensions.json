@@ -1,0 +1,17 @@
+[
+  {
+    "question": "Can PhD duration be extended?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Who approves extensions?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is the maximum extension?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

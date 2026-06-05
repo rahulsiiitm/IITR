@@ -1,0 +1,47 @@
+[
+  {
+    "question": "What is hostel fee?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "What is mess fee?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "What is placement percentage?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "What is average package?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "What is NIRF ranking?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "Who is the current director?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "Who is the current dean?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "How many students are enrolled?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  },
+  {
+    "question": "What is IIT Roorkee's QS ranking?",
+    "expect_type": "unavailable",
+    "must_contain": []
+  }
+]

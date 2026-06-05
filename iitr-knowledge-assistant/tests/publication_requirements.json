@@ -1,26 +1,26 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "Are publications mandatory?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "How many publications are required?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "Are patents accepted?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "Can patents replace publications?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "What publication quality is required?",
     "expect_type": "answer",
     "must_contain": []
   }

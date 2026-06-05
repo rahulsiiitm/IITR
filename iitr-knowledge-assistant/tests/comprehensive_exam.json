@@ -1,0 +1,57 @@
+[
+  {
+    "question": "What is comprehensive examination?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Who defines the syllabus?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Who conducts the examination?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "How many attempts are allowed?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can I attempt it twice?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can I attempt it three times?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What happens if I fail?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is the minimum gap between attempts?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "One attempt?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Two attempts?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Three attempts?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

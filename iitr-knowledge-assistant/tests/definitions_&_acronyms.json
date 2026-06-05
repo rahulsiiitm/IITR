@@ -1,0 +1,87 @@
+[
+  {
+    "question": "What is SRC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is DRC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is CRC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is ScRC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is ODC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is DAA?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is SGPA?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is CGPA?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is IRC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is HoD?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is HoC?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is PhD candidacy?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is comprehensive examination?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is course work?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is synopsis?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is thesis?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is oral defense?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

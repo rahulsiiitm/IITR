@@ -1,0 +1,62 @@
+[
+  {
+    "question": "Who can apply for PhD?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can BTech students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MTech students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MSc students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MBA students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MA students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MBBS students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can BDS students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can BAMS students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can BHMS students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MD students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can MS students apply?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

@@ -1,26 +1,31 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "What is ODC?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "Who is part of ODC?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "What is oral defense?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "What is viva voce?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "When is viva conducted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Who attends viva?",
     "expect_type": "answer",
     "must_contain": []
   }

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is the research proposal requirement?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Who approves the proposal?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "When must the proposal be submitted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Is proposal approval required for candidacy?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

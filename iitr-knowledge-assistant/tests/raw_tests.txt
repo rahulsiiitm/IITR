@@ -1,0 +1,207 @@
+1. DEFINITIONS & ACRONYMS
+What is SRC?
+What is DRC?
+What is CRC?
+What is ScRC?
+What is ODC?
+What is DAA?
+What is SGPA?
+What is CGPA?
+What is IRC?
+What is HoD?
+What is HoC?
+What is PhD candidacy?
+What is comprehensive examination?
+What is course work?
+What is synopsis?
+What is thesis?
+What is oral defense?
+2. ADMISSION ELIGIBILITY
+Who can apply for PhD?
+Can BTech students apply?
+Can MTech students apply?
+Can MSc students apply?
+Can MBA students apply?
+Can MA students apply?
+Can MBBS students apply?
+Can BDS students apply?
+Can BAMS students apply?
+Can BHMS students apply?
+Can MD students apply?
+Can MS students apply?
+3. ADMISSION THRESHOLDS
+What percentage is required?
+What CGPA is required?
+Can I apply with 59%?
+Can I apply with 60%?
+Can I apply with 60.1%?
+Can I apply with 5.99 CGPA?
+Can I apply with 6.0 CGPA?
+Can I apply with 6.01 CGPA?
+4. DIRECT PHD ADMISSION
+Who is eligible for direct PhD admission?
+Can IIT graduates get direct admission?
+What CGPA is required for direct admission?
+Can a BTech student directly join PhD?
+5. NATIONAL TESTS
+Is GATE accepted?
+Is CEED accepted?
+Is JEST accepted?
+Is UGC-NET accepted?
+Is CSIR-NET accepted?
+Can fellowship holders apply?
+6. GATE EXEMPTION
+Who gets GATE exemption?
+What CGPA is required for GATE exemption?
+Do IIT graduates need GATE?
+Do NIT graduates need GATE?
+Boundary tests:
+CGPA 7.99
+CGPA 8.0
+CGPA 8.01
+CGPA 7.999
+CGPA 8.000
+CGPA 8.001
+7. COURSEWORK
+What coursework is required?
+How many credits are required?
+What is the minimum coursework CGPA?
+Can NPTEL courses be counted?
+Can self-study courses be counted?
+How many self-study courses are allowed?
+How many seminar credits are required?
+8. CANDIDACY
+What is candidacy?
+What are candidacy requirements?
+What must be completed before candidacy?
+What CGPA is required for candidacy?
+Who approves candidacy?
+9. COMPREHENSIVE EXAM
+What is comprehensive examination?
+Who defines the syllabus?
+Who conducts the examination?
+How many attempts are allowed?
+Can I attempt it twice?
+Can I attempt it three times?
+What happens if I fail?
+What is the minimum gap between attempts?
+Boundary:
+One attempt?
+Two attempts?
+Three attempts?
+10. RESEARCH PROPOSAL
+What is the research proposal requirement?
+Who approves the proposal?
+When must the proposal be submitted?
+Is proposal approval required for candidacy?
+11. SUPERVISOR
+Who appoints the supervisor?
+Can a supervisor be changed?
+How many supervisors can a student have?
+How many co-supervisors are allowed?
+Can a co-supervisor be external?
+How many external co-supervisors are allowed?
+12. SRC
+When is SRC formed?
+Who is part of SRC?
+Who chairs SRC?
+Can SRC be changed?
+What are SRC responsibilities?
+13. REGISTRATION
+What is academic registration?
+How often must a student register?
+Can registration lapse?
+When does registration begin?
+14. RESIDENCY REQUIREMENTS
+What is minimum residency requirement?
+What is maximum residency requirement?
+Do part-time students have residency requirements?
+Do EPE students have residency requirements?
+15. DURATION
+What is minimum duration of PhD?
+What is maximum duration of PhD?
+What is maximum duration for full-time students?
+What is maximum duration for part-time students?
+16. EXTENSIONS
+Can PhD duration be extended?
+Who approves extensions?
+What is the maximum extension?
+17. THESIS
+What are thesis submission requirements?
+What must be completed before thesis submission?
+What is synopsis?
+When must synopsis be submitted?
+When must thesis be submitted after synopsis?
+What is maximum extension after synopsis?
+18. THESIS EVALUATION
+How many examiners evaluate the thesis?
+Who selects the examiners?
+How many examiners must recommend acceptance?
+What happens if one examiner rejects?
+What happens if two examiners reject?
+19. ODC / VIVA
+What is ODC?
+Who is part of ODC?
+What is oral defense?
+What is viva voce?
+When is viva conducted?
+Who attends viva?
+20. PERFORMANCE MONITORING
+What is satisfactory unit?
+What is unsatisfactory unit?
+What happens after 6 unsatisfactory units?
+What happens after 12 unsatisfactory units?
+Who issues warnings?
+21. PUBLICATION REQUIREMENTS
+Are publications mandatory?
+How many publications are required?
+Are patents accepted?
+Can patents replace publications?
+What publication quality is required?
+22. PATENTS
+Can patents be counted?
+Are granted patents accepted?
+Are filed patents accepted?
+What patent requirements exist?
+23. EPE CATEGORY
+What is EPE?
+Who is eligible for EPE?
+What are EPE admission requirements?
+What are EPE residency requirements?
+What are EPE coursework requirements?
+24. NUMERICAL BOUNDARY TESTS
+59.99%
+60%
+60.01%
+5.99
+6.0
+6.01
+6.99
+7.0
+7.01
+7.99
+8.0
+8.01
+7.999
+8.000
+8.001
+25. HALLUCINATION TESTS
+What is hostel fee?
+What is mess fee?
+What is placement percentage?
+What is average package?
+What is NIRF ranking?
+Who is the current director?
+Who is the current dean?
+How many students are enrolled?
+What is IIT Roorkee's QS ranking?
+26. MULTI-HOP / FINAL BOSS QUESTIONS
+I have CGPA 7.99 from IIT. Do I need GATE and what candidacy CGPA is required?
+I have CGPA 8.0 from IIT. Do I need GATE and what coursework requirements apply?
+Describe the complete academic journey from admission to degree award.
+Compare candidacy requirements and thesis submission requirements.
+What must a student complete before candidacy and before thesis submission?
+I have accumulated 12 unsatisfactory units. What happens?
+Can a student with CGPA 6.0 apply and what CGPA is needed later for candidacy?
+What are all requirements from admission until oral defense?
+Explain the complete thesis evaluation process.

@@ -12,15 +12,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 from backend.main import app
+from backend.api.limiter import limiter
+
+# Disable rate limiting for the test suite to prevent 429 errors
+limiter.enabled = False
 
 def main():
-    test_files = {
-        "admission": "tests/admission.json",
-        "gate": "tests/gate.json",
-        "candidacy": "tests/candidacy.json",
-        "thesis": "tests/thesis.json",
-        "hallucination": "tests/hallucination.json"
-    }
+    import glob
+    test_files = {Path(p).stem: p for p in glob.glob("tests/*.json") if "raw" not in p}
 
     results = []
     

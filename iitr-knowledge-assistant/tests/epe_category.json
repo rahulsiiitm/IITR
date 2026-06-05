@@ -1,26 +1,26 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "What is EPE?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "Who is eligible for EPE?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "What are EPE admission requirements?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "What are EPE residency requirements?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "What are EPE coursework requirements?",
     "expect_type": "answer",
     "must_contain": []
   }

@@ -1,26 +1,31 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "Is GATE accepted?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "Is CEED accepted?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "Is JEST accepted?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "Is UGC-NET accepted?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "Is CSIR-NET accepted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can fellowship holders apply?",
     "expect_type": "answer",
     "must_contain": []
   }

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is minimum residency requirement?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is maximum residency requirement?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Do part-time students have residency requirements?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Do EPE students have residency requirements?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is minimum duration of PhD?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is maximum duration of PhD?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is maximum duration for full-time students?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What is maximum duration for part-time students?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

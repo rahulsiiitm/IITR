@@ -1,0 +1,22 @@
+[
+  {
+    "question": "Can patents be counted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Are granted patents accepted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Are filed patents accepted?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What patent requirements exist?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]

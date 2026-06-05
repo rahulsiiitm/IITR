@@ -1,26 +1,26 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "When is SRC formed?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "Who is part of SRC?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "Who chairs SRC?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "Can SRC be changed?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "What are SRC responsibilities?",
     "expect_type": "answer",
     "must_contain": []
   }

@@ -1,26 +1,26 @@
 [
   {
-    "question": "What is candidacy?",
+    "question": "What is satisfactory unit?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What are candidacy requirements?",
+    "question": "What is unsatisfactory unit?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before candidacy?",
+    "question": "What happens after 6 unsatisfactory units?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What CGPA is required for candidacy?",
+    "question": "What happens after 12 unsatisfactory units?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "Who approves candidacy?",
+    "question": "Who issues warnings?",
     "expect_type": "answer",
     "must_contain": []
   }

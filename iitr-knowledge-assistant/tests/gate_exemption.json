@@ -1,0 +1,66 @@
+[
+  {
+    "question": "Who gets GATE exemption?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What CGPA is required for GATE exemption?",
+    "expect_type": "answer",
+    "must_contain": [
+      "8.0"
+    ]
+  },
+  {
+    "question": "Do IIT graduates need GATE?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Do NIT graduates need GATE?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "CGPA 7.99",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "CGPA 8.0",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "CGPA 8.01",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "CGPA 7.999",
+    "expect_type": "answer",
+    "must_contain": [
+      "no"
+    ]
+  },
+  {
+    "question": "CGPA 8.000",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  },
+  {
+    "question": "CGPA 8.001",
+    "expect_type": "answer",
+    "must_contain": [
+      "yes"
+    ]
+  }
+]

@@ -1,31 +1,31 @@
 [
   {
-    "question": "What are thesis submission requirements?",
+    "question": "Who appoints the supervisor?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What must be completed before thesis submission?",
+    "question": "Can a supervisor be changed?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What is synopsis?",
+    "question": "How many supervisors can a student have?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "When must synopsis be submitted?",
+    "question": "How many co-supervisors are allowed?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "When must thesis be submitted after synopsis?",
+    "question": "Can a co-supervisor be external?",
     "expect_type": "answer",
     "must_contain": []
   },
   {
-    "question": "What is maximum extension after synopsis?",
+    "question": "How many external co-supervisors are allowed?",
     "expect_type": "answer",
     "must_contain": []
   }

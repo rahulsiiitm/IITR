@@ -1,0 +1,22 @@
+[
+  {
+    "question": "Who is eligible for direct PhD admission?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can IIT graduates get direct admission?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "What CGPA is required for direct admission?",
+    "expect_type": "answer",
+    "must_contain": []
+  },
+  {
+    "question": "Can a BTech student directly join PhD?",
+    "expect_type": "answer",
+    "must_contain": []
+  }
+]
