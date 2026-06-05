@@ -39,12 +39,18 @@ async def lifespan(app: FastAPI):
     yield
 
 
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from backend.api.limiter import limiter
+
 app = FastAPI(
     title="IITR Knowledge Assistant",
     description="Institution-wide AI assistant for official IIT Roorkee documents",
     version="0.1.0",
     lifespan=lifespan,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

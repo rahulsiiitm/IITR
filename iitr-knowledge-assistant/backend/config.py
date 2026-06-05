@@ -46,8 +46,9 @@ class Settings(BaseSettings):
     confidence_threshold: float = -5.0
 
     api_port: int = 45123
+    api_key: str = "dev_key_123"
 
-    debug: bool = True
+    debug: bool = False
     log_level: str = "INFO"
     cors_origins: str = (
         "http://localhost:3000,http://localhost:8080,"

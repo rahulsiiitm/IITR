@@ -1,8 +1,12 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+import asyncio
+from fastapi import APIRouter, HTTPException, Request, Security, Depends
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
+
+from backend.api.limiter import limiter
 
 from backend.config import settings
 from backend.generation.llm import ask as generate_answer
@@ -29,8 +33,20 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+llm_semaphore = asyncio.Semaphore(3)
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+def get_api_key(api_key: str = Security(api_key_header)) -> str:
+    if not settings.api_key:
+        return "" # No auth configured
+    if api_key != settings.api_key:
+        raise HTTPException(status_code=403, detail="Could not validate API key")
+    return api_key
+
+
 class AskRequest(BaseModel):
-    question: str = Field(..., min_length=1)
+    question: str = Field(..., min_length=1, max_length=500)
 
 
 class SourceItem(BaseModel):
@@ -65,7 +81,8 @@ def _get_index_state(request: Request) -> tuple[Any, list[dict]]:
 
 
 @router.post("/ask", response_model=AskResponse)
-def ask_question(body: AskRequest, request: Request) -> AskResponse:
+@limiter.limit("20/minute")
+async def ask_question(body: AskRequest, request: Request, api_key: str = Depends(get_api_key)) -> AskResponse:
     question = body.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="No question provided")
@@ -200,7 +217,8 @@ def ask_question(body: AskRequest, request: Request) -> AskResponse:
             if kw in q_lower and kw not in context_text:
                 return AskResponse(answer=NOT_AVAILABLE, sources=[])
 
-        result = generate_answer(question, expanded)
+        async with llm_semaphore:
+            result = await generate_answer(question, expanded)
         ans_text = result["answer"]
         ans_text_lower = ans_text.lower()
         

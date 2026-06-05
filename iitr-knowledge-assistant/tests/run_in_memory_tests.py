@@ -52,7 +52,8 @@ def main():
 
                 # Query FastAPI in-memory
                 start_time = time.time()
-                response = client.post("/ask", json={"question": q})
+                headers = {"X-API-Key": "dev_key_123"}
+                response = client.post("/ask", json={"question": q}, headers=headers)
                 latency = time.time() - start_time
                 
                 ans = response.json().get("answer", "")

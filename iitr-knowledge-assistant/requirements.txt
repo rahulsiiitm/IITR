@@ -8,3 +8,5 @@ sentence-transformers
 faiss-cpu
 langchain-text-splitters
 numpy
+httpx
+slowapi

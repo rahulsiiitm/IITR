@@ -148,10 +148,18 @@ const API_BASE = window.API_SAME_ORIGIN
 
 async function sendToBackend(question) {
   let res;
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  
+  if (window.API_KEY) {
+    headers['X-API-Key'] = window.API_KEY;
+  }
+
   try {
     res = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({ question }),
     });
   } catch (err) {
