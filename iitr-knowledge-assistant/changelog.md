@@ -25,5 +25,5 @@ All notable changes to the **IITR Knowledge Assistant** project are documented h
 
 ### Added
 - **RAG MVP Prototype**: Initial implementation of the offline PhD Regulations chat assistant (basic dense RAG system using FAISS search and Ollama).
-- **FastAPI Backend**: Built endpoints to query the assistant and check service health.
+- **Flask Backend**: Built endpoints to query the assistant and check service health.
 - **Vanilla Web UI**: Initial layout of the responsive frontend chat interface.
