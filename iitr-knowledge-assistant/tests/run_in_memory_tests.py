@@ -13,6 +13,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 from backend.main import app
 from backend.api.limiter import limiter
+from backend.config import settings
 
 # Disable rate limiting for the test suite to prevent 429 errors
 limiter.enabled = False
@@ -60,7 +61,7 @@ def main():
 
                 # Query FastAPI in-memory
                 start_time = time.time()
-                headers = {"X-API-Key": "dev_key_123"}
+                headers = {"X-API-Key": settings.api_key} if settings.api_key else {}
                 response = client.post("/ask", json={"question": q}, headers=headers)
                 latency = time.time() - start_time
                 

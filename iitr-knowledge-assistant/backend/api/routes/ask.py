@@ -213,4 +213,4 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
     except Exception as exc:
         logger.exception("Error processing question")
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise HTTPException(status_code=500, detail="An internal error occurred while processing your question.")

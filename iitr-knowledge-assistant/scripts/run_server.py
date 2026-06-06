@@ -16,9 +16,11 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def write_api_config(port: int) -> None:
+    from backend.config import settings
     path = ROOT / "frontend" / "api-config.js"
+    api_key_line = f"\nwindow.API_KEY = '{settings.api_key}';" if settings.api_key else ""
     path.write_text(
-        f"window.API_SAME_ORIGIN = true;\nwindow.API_PORT = {port};\n",
+        f"window.API_SAME_ORIGIN = true;\nwindow.API_PORT = {port};{api_key_line}\n",
         encoding="utf-8",
     )
 
