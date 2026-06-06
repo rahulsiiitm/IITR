@@ -235,6 +235,10 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             "does not provide",
             "not clear from",
             "cannot be determined",
+            "not provided here",
+            "is not provided",
+            "no information",
+            "does not contain information"
         ]
         if any(ind in ans_text_lower for ind in na_indicators) and len(ans_text_lower) < 200:
             ans_text = NOT_AVAILABLE

@@ -4,16 +4,31 @@ GREETINGS = {"hi", "hello", "hey", "hii", "hiii", "yo", "sup", "greetings"}
 
 
 def check_greeting(question: str) -> dict | None:
-    """Return a friendly reply for simple greetings (no LLM call)."""
-    if question.strip().lower().rstrip("!., ") in GREETINGS:
+    """Return a friendly reply for simple greetings or identity questions."""
+    q_lower = question.strip().lower().rstrip("!., ?")
+    
+    if q_lower in GREETINGS:
         return {
             "answer": (
-                "Hello! I'm the IIT Roorkee Knowledge Assistant. "
-                "Ask me anything about PhD regulations — eligibility, GATE exemption, "
-                "coursework, candidacy, thesis submission, and more."
+                "Hello! I'm the official IIT Roorkee PhD Knowledge Assistant. "
+                "I can answer questions about PhD admissions, coursework, candidacy, "
+                "thesis evaluation, and other academic regulations based on the rulebook."
             ),
             "sources": [],
         }
+        
+    identity_questions = {"who are you", "what are you", "what do you do", "introduce yourself", "who am i talking to"}
+    if q_lower in identity_questions:
+        return {
+            "answer": (
+                "I am the official IIT Roorkee PhD Knowledge Assistant. "
+                "I am an AI trained specifically on the IIT Roorkee PhD Regulations rulebook. "
+                "I can help you understand admission requirements, GATE exemptions, coursework, "
+                "candidacy rules, and the complete thesis evaluation process."
+            ),
+            "sources": [],
+        }
+        
     return None
 
 

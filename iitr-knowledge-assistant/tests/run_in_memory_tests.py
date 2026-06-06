@@ -18,6 +18,15 @@ from backend.api.limiter import limiter
 limiter.enabled = False
 
 def main():
+    import logging
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("iitr.analytics").setLevel(logging.WARNING)
+    logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+    logging.getLogger("backend.generation.llm").setLevel(logging.WARNING)
+    logging.getLogger("backend.api.routes.ask").setLevel(logging.WARNING)
+    
+    # Suppress tqdm progress bars from sentence_transformers
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
     import glob
     test_files = {Path(p).stem: p for p in glob.glob("tests/*.json") if "raw" not in p}
 
@@ -112,7 +121,10 @@ def main():
                 print(f"    Status: {status_str} (latency: {latency:.2f}s)")
                 if not passed:
                     print(f"    Reason: {fail_reason}")
-                    print(f"    Got: {ans}")
+                
+                # Format the answer cleanly (handling multi-line answers)
+                ans_clean = ans.replace('\n', '\n          ')
+                print(f"    Ans:    {ans_clean}\n")
 
                 results.append({
                     "category": category,
