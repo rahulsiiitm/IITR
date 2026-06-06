@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import re
 import subprocess
 import sys
@@ -16,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def write_api_config(port: int) -> None:
+    sys.path.insert(0, str(ROOT))
     from backend.config import settings
     path = ROOT / "frontend" / "api-config.js"
     api_key_line = f"\nwindow.API_KEY = '{settings.api_key}';" if settings.api_key else ""
@@ -89,7 +91,7 @@ def main() -> None:
             "--host",
             "127.0.0.1",
             "--port",
-            "0",
+            "45123",
             "--workers",
             "4",
         ],
