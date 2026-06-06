@@ -17,15 +17,8 @@ from backend.query.shortcuts import (
     check_candidacy_cgpa_shortcut,
     check_cgpa_gate_shortcut,
     check_greeting,
-    check_patent_shortcut,
     check_vague_requirements,
-    check_comprehensive_attempts_shortcut,
-    check_candidacy_requirements_shortcut,
-    check_thesis_shortcuts,
-    check_admission_shortcuts,
-    check_gate_exemption_shortcut,
     check_admission_numerical_shortcut,
-    check_national_test_shortcuts,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
 
@@ -33,7 +26,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-llm_semaphore = asyncio.Semaphore(3)
+llm_semaphore = asyncio.Semaphore(15)
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -114,12 +107,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             sources=[SourceItem(**s) for s in adm_num["sources"]],
         )
 
-    nat_test = check_national_test_shortcuts(question)
-    if nat_test:
-        return AskResponse(
-            answer=nat_test["answer"],
-            sources=[SourceItem(**s) for s in nat_test["sources"]],
-        )
+
 
     shortcut = check_cgpa_gate_shortcut(question)
     if shortcut:
@@ -135,47 +123,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             sources=[SourceItem(**s) for s in candidacy_shortcut["sources"]],
         )
 
-    patent = check_patent_shortcut(question)
-    if patent:
-        return AskResponse(
-            answer=patent["answer"],
-            sources=[SourceItem(**s) for s in patent["sources"]],
-        )
 
-    comp_attempts = check_comprehensive_attempts_shortcut(question)
-    if comp_attempts:
-        return AskResponse(
-            answer=comp_attempts["answer"],
-            sources=[SourceItem(**s) for s in comp_attempts["sources"]],
-        )
-
-    cand_reqs = check_candidacy_requirements_shortcut(question)
-    if cand_reqs:
-        return AskResponse(
-            answer=cand_reqs["answer"],
-            sources=[SourceItem(**s) for s in cand_reqs["sources"]],
-        )
-
-    thesis_shortcut = check_thesis_shortcuts(question)
-    if thesis_shortcut:
-        return AskResponse(
-            answer=thesis_shortcut["answer"],
-            sources=[SourceItem(**s) for s in thesis_shortcut["sources"]],
-        )
-
-    admission_shortcut = check_admission_shortcuts(question)
-    if admission_shortcut:
-        return AskResponse(
-            answer=admission_shortcut["answer"],
-            sources=[SourceItem(**s) for s in admission_shortcut["sources"]],
-        )
-
-    gate_ex_shortcut = check_gate_exemption_shortcut(question)
-    if gate_ex_shortcut:
-        return AskResponse(
-            answer=gate_ex_shortcut["answer"],
-            sources=[SourceItem(**s) for s in gate_ex_shortcut["sources"]],
-        )
 
     index, chunks = _get_index_state(request)
 

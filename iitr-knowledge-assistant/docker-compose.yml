@@ -12,6 +12,7 @@ services:
       - EMBEDDING_MODEL=BAAI/bge-small-en-v1.5
       - RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
       - OLLAMA_MODEL=mistral:latest
+      - OLLAMA_NUM_PARALLEL=4
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

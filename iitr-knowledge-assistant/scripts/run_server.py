@@ -60,25 +60,7 @@ def port_for_pid(pid: int) -> int | None:
     return None
 
 
-def wait_for_server(pid: int, timeout: float = 60.0) -> int | None:
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        port = port_for_pid(pid)
-        if port:
-            try:
-                r = requests.get(f"http://127.0.0.1:{port}/health", timeout=1)
-                if r.ok:
-                    return port
-            except requests.RequestException:
-                pass
-        if proc_returned := subprocess.poll_if_exists(pid):
-            if proc_returned is not None and proc_returned != 0:
-                return None
-        time.sleep(0.3)
-    return None
 
-
-# subprocess.poll_if_exists doesn't exist - use os.waitpid with WNOHANG or Popen.poll
 
 
 def main() -> None:
@@ -106,6 +88,8 @@ def main() -> None:
             "127.0.0.1",
             "--port",
             "0",
+            "--workers",
+            "4",
         ],
         cwd=ROOT,
     )
