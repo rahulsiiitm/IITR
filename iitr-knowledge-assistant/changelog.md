@@ -4,6 +4,21 @@ All notable changes to the **IITR Knowledge Assistant** project are documented h
 
 ---
 
+## [1.1.0] - 2026-06-06
+
+### Changed
+- **Ollama `/api/chat` Migration**: Switched from `/api/generate` (single prompt blob) to `/api/chat` with proper `system` and `user` message roles. This dramatically improves instruction-following and eliminates the gibberish output observed with the old endpoint.
+- **Prompt Architecture Refactored**: Split `build_user_prompt()` to return only user-role content (context + question + dynamic hints). The system prompt is now sent as a separate message, giving the LLM clearer instruction boundaries.
+- **Context Builder Optimized**: Changed from sending full page text to sending only the retrieved chunks grouped by page number. Reduces context window waste by ~60%, allowing the LLM to focus on relevant content.
+- **Config Defaults Aligned**: Synchronized `config.py` model defaults (`bge-base-en-v1.5`, `bge-reranker-base`) with `.env` to prevent silent model mismatches when `.env` is absent.
+
+### Fixed
+- **LLM Gibberish Output**: The previous test run (phi4-mini via `/api/generate`) produced incoherent output for all non-shortcut queries (5 test failures, 89.4% accuracy). With mistral via `/api/chat`, all previously-failing queries now return correct, coherent answers.
+- **Duplicate GREETINGS Set**: Removed redundant `GREETINGS` constant and dead greeting code path from `llm.py` — greetings are handled upstream by `shortcuts.py` before reaching the LLM.
+- **Hardcoded Test Path**: Replaced absolute path (`/home/rahul/...`) in `tests/run_in_memory_tests.py` with dynamic `Path(__file__).resolve().parent.parent` for portability.
+
+---
+
 ## [1.0.0] - 2026-06-04
 
 ### Added

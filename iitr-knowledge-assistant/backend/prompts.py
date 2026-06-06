@@ -112,13 +112,13 @@ Give the shortest correct answer that fully satisfies the question.
 """
 
 
-
-
 def build_user_prompt(question: str, context: str) -> str:
-    """Build the full user prompt with context and dynamic rules."""
-    prompt = f"""{SYSTEM_PROMPT}
+    """Build the user-role message with context and dynamic rules.
 
-Context:
+    Returns only the user content — the system prompt is sent separately
+    via the /api/chat messages array.
+    """
+    prompt = f"""Context:
 {context}
 
 Question:
@@ -187,8 +187,7 @@ If multiple questions are asked:
 
 
 def build_greeting_prompt(question: str) -> str:
-    return f"""{SYSTEM_PROMPT}
-
-The user said: "{question}"
+    """Build user-role message for greeting exchanges."""
+    return f"""The user said: "{question}"
 
 Respond with a brief, friendly greeting and ask how you can help with PhD admission queries."""

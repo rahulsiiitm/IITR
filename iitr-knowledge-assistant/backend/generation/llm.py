@@ -4,21 +4,31 @@ import httpx
 
 from backend.config import settings
 from backend.generation.context_builder import build_context
-from backend.prompts import build_greeting_prompt, build_user_prompt
+from backend.prompts import SYSTEM_PROMPT, build_greeting_prompt, build_user_prompt
 
 logger = logging.getLogger(__name__)
 
-GREETINGS = {"hi", "hello", "hey", "hii", "hiii", "yo", "sup", "greetings"}
 
-
-async def _call_ollama(prompt: str) -> str:
+async def _call_ollama(system: str, user: str) -> str:
+    """Call Ollama /api/chat with proper system and user message roles."""
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
     async with httpx.AsyncClient(timeout=120.0) as client:
         response = await client.post(
             settings.ollama_url,
-            json={"model": settings.ollama_model, "prompt": prompt, "stream": False},
+            json={
+                "model": settings.ollama_model,
+                "messages": messages,
+                "stream": False,
+            },
         )
         response.raise_for_status()
-        return response.json().get("response", "No response from model.").strip()
+        data = response.json()
+        # /api/chat returns {"message": {"role": "assistant", "content": "..."}}
+        msg = data.get("message", {})
+        return msg.get("content", data.get("response", "No response from model.")).strip()
 
 
 def _format_sources(context_chunks: list[dict]) -> list[dict]:
@@ -34,16 +44,12 @@ def _format_sources(context_chunks: list[dict]) -> list[dict]:
 
 async def ask(question: str, context_chunks: list[dict]) -> dict:
     """Generate an answer using Ollama with RAG context asynchronously."""
-    if question.strip().lower().rstrip("!., ") in GREETINGS:
-        prompt = build_greeting_prompt(question)
-        answer = await _call_ollama(prompt)
-        return {"answer": answer, "sources": []}
-
     context = build_context(context_chunks)
-    prompt = build_user_prompt(question, context)
+    user_prompt = build_user_prompt(question, context)
 
-    logger.debug("Sending prompt to Ollama (%d chars)", len(prompt))
-    answer = await _call_ollama(prompt)
+    logger.debug("Sending prompt to Ollama (%d chars system, %d chars user)",
+                 len(SYSTEM_PROMPT), len(user_prompt))
+    answer = await _call_ollama(SYSTEM_PROMPT, user_prompt)
 
     return {
         "answer": answer,

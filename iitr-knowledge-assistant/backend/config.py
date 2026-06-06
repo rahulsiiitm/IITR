@@ -32,10 +32,10 @@ class Settings(BaseSettings):
     pdf_path: Path = Field(default=PROJECT_ROOT / "data" / "raw" / "phd_regulations_2026.pdf")
     vector_db_dir: Path = Field(default=PROJECT_ROOT / "vector_db")
 
-    embedding_model: str = "BAAI/bge-small-en-v1.5"
-    rerank_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    embedding_model: str = "BAAI/bge-base-en-v1.5"
+    rerank_model: str = "BAAI/bge-reranker-base"
     ollama_model: str = "mistral:latest"
-    ollama_url: str = "http://localhost:11434/api/generate"
+    ollama_url: str = "http://localhost:11434/api/chat"
 
     top_k: int = 15
     subquestion_top_k: int = 6
