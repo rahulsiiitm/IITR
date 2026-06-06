@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     embedding_model: str = "BAAI/bge-base-en-v1.5"
     rerank_model: str = "BAAI/bge-reranker-base"
-    ollama_model: str = "mistral:latest"
+    ollama_model: str = "phi4-mini:latest"
     ollama_url: str = "http://localhost:11434/api/chat"
 
     top_k: int = 15

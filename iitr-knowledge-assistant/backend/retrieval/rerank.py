@@ -77,7 +77,7 @@ def rerank(
         score = best_scores[idx]
         chunk_lower = candidate["chunk"].lower()
         if not is_epe_query and (
-            "professional experience" in chunk_lower or "epe" in chunk_lower
+            "professional experience" in chunk_lower or re.search(r"\bepe\b", chunk_lower)
         ):
             score -= 10.0
         candidate["rerank_score"] = score

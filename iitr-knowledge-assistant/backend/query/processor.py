@@ -27,6 +27,14 @@ QUERY_EXPANSIONS = {
     # Working period / thesis submission duration (Page 34)
     "working period": "minimum working period thesis submission candidacy duration R.8",
     "minimum working": "minimum working period thesis submission candidacy duration R.8",
+    # Performance Monitoring / Warnings / Unsatisfactory Progress (Page 32)
+    "warning": "warning unsatisfactory progress report academic affairs office R.8",
+    "warnings": "warning unsatisfactory progress report academic affairs office R.8",
+    "unsatisfactory": "unsatisfactory progress report academic affairs office academic registration cancelled units R.8",
+    # Comprehensive Examination Attempts (Page 31)
+    "attempt": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
+    "attempts": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
+    "twice": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
 }
 
 

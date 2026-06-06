@@ -92,8 +92,6 @@ def main() -> None:
             "127.0.0.1",
             "--port",
             "45123",
-            "--workers",
-            "4",
         ],
         cwd=ROOT,
     )

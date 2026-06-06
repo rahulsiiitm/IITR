@@ -15,13 +15,18 @@ async def _call_ollama(system: str, user: str) -> str:
         {"role": "system", "content": system},
         {"role": "user", "content": user},
     ]
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=400.0) as client:
         response = await client.post(
             settings.ollama_url,
             json={
                 "model": settings.ollama_model,
                 "messages": messages,
                 "stream": False,
+                "options": {
+                    "temperature": 0.0,
+                    "repeat_penalty": 1.1,
+                    "num_predict": 250,
+                },
             },
         )
         response.raise_for_status()

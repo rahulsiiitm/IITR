@@ -7,12 +7,23 @@ import urllib.error
 import time
 
 def ask_question(question, port=33895):
+    api_key = None
+    try:
+        from backend.config import settings
+        api_key = settings.api_key
+    except Exception:
+        pass
+
     url = f"http://127.0.0.1:{port}/ask"
     data = json.dumps({"question": question}).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["X-API-Key"] = api_key
+
     req = urllib.request.Request(
         url,
         data=data,
-        headers={"Content-Type": "application/json"}
+        headers=headers
     )
     try:
         start_time = time.time()
