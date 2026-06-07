@@ -15,12 +15,13 @@ def get_cross_encoder() -> CrossEncoder:
 
 
 def _query_variants(query: str) -> list[str]:
+    from backend.query.processor import expand_query_intent
     sub_q = [
         q.strip()
         for q in re.split(r"(?i)\?|\s+and\s+|\s+also\s+|\s+or\s+", query)
         if q.strip()
     ]
-    variants = [query] + sub_q
+    variants = [query, expand_query_intent(query)] + sub_q
     all_queries: list[str] = []
 
     for q in variants:

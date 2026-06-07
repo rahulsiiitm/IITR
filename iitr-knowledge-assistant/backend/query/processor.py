@@ -24,9 +24,12 @@ QUERY_EXPANSIONS = {
     "percentage required": "minimum qualifications admission eligibility criteria qualifying degree",
     "eligible for direct": "minimum qualifications admission eligibility criteria qualifying degree gate exemption",
     "direct phd": "minimum qualifications admission eligibility criteria qualifying degree gate exemption",
+    "admission process": "Admission Procedure short-listing criteria written test and/or interview A.4",
+    "admission procedure": "Admission Procedure short-listing criteria written test and/or interview A.4",
     # Working period / thesis submission duration (Page 34)
     "working period": "minimum working period thesis submission candidacy duration R.8",
     "minimum working": "minimum working period thesis submission candidacy duration R.8",
+    "maximum duration": "Maximum Duration for Thesis Submission five years full-time six years part-time",
     # Performance Monitoring / Warnings / Unsatisfactory Progress (Page 32)
     "warning": "warning unsatisfactory progress report academic affairs office R.8",
     "warnings": "warning unsatisfactory progress report academic affairs office R.8",

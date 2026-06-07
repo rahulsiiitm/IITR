@@ -7,7 +7,8 @@ def check_greeting(question: str) -> dict | None:
     """Return a friendly reply for simple greetings or identity questions."""
     q_lower = question.strip().lower().rstrip("!., ?")
     
-    if q_lower in GREETINGS:
+    # Catch basic greetings including 'hey', 'hello', etc.
+    if re.match(r"^(hi+|hello+|hey+|yo|sup|greetings)( there)?$", q_lower):
         return {
             "answer": (
                 "Hello! I'm the official IIT Roorkee PhD Knowledge Assistant. "
@@ -17,8 +18,8 @@ def check_greeting(question: str) -> dict | None:
             "sources": [],
         }
         
-    identity_questions = {"who are you", "what are you", "what do you do", "introduce yourself", "who am i talking to"}
-    if q_lower in identity_questions:
+    # Catch variations of "who are you" / "what are you"
+    if re.match(r"^(who|what)\s+(are|r)\s+(you|u)(.*)?$", q_lower) or re.match(r"^(introduce|tell me about)\s+(yourself|urself)(.*)?$", q_lower):
         return {
             "answer": (
                 "I am the official IIT Roorkee PhD Knowledge Assistant. "
