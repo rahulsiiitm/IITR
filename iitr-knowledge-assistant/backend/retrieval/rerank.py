@@ -131,8 +131,6 @@ def expand_context(candidates: list[dict], chunks: list[dict]) -> list[dict]:
                 chunk_data["chunk"] = chunk_data.get("text", chunk_data.get("chunk", ""))
                 if neighbor_idx == idx:
                     chunk_data["rerank_score"] = candidate.get("rerank_score", 0)
-                else:
-                    chunk_data["rerank_score"] = candidate.get("rerank_score", 0) - 1.0
                 expanded.append(chunk_data)
                 seen_indices.add(neighbor_idx)
 

@@ -6,6 +6,7 @@ const clearBtn = document.getElementById('clearBtn');
 const welcomeMessage = document.getElementById('welcomeMessage');
 
 let isProcessing = false;
+let currentSessionId = null;
 
 inputForm.addEventListener('submit', (e) => {
   e.preventDefault();
@@ -17,6 +18,7 @@ inputForm.addEventListener('submit', (e) => {
 clearBtn.addEventListener('click', () => {
   chatArea.querySelectorAll('.msg').forEach((el) => el.remove());
   welcomeMessage.style.display = 'flex';
+  currentSessionId = null;
 });
 
 document.addEventListener('click', (e) => {
@@ -156,11 +158,16 @@ async function sendToBackend(question) {
     headers['X-API-Key'] = window.API_KEY;
   }
 
+  const payload = { question };
+  if (currentSessionId) {
+    payload.session_id = currentSessionId;
+  }
+
   try {
     res = await fetch(`${API_BASE}/ask`, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ question }),
+      body: JSON.stringify(payload),
     });
   } catch (err) {
     throw new Error(
@@ -173,5 +180,9 @@ async function sendToBackend(question) {
     const msg = typeof detail === 'string' ? detail : JSON.stringify(detail) || res.statusText;
     throw new Error(msg || 'Failed to reach backend API');
   }
-  return await res.json();
+  const data = await res.json();
+  if (data.session_id) {
+    currentSessionId = data.session_id;
+  }
+  return data;
 }

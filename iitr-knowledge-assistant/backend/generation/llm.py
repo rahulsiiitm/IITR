@@ -9,12 +9,12 @@ from backend.prompts import SYSTEM_PROMPT, build_greeting_prompt, build_user_pro
 logger = logging.getLogger(__name__)
 
 
-async def _call_ollama(system: str, user: str) -> str:
+async def _call_ollama(system: str, user: str, history: list[dict] = None) -> str:
     """Call Ollama /api/chat with proper system and user message roles."""
-    messages = [
-        {"role": "system", "content": system},
-        {"role": "user", "content": user},
-    ]
+    messages = [{"role": "system", "content": system}]
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": user})
     async with httpx.AsyncClient(timeout=400.0) as client:
         response = await client.post(
             settings.ollama_url,
@@ -47,14 +47,14 @@ def _format_sources(context_chunks: list[dict]) -> list[dict]:
     return sorted(sources, key=lambda s: s["page"])
 
 
-async def ask(question: str, context_chunks: list[dict]) -> dict:
+async def ask(question: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
     """Generate an answer using Ollama with RAG context asynchronously."""
     context = build_context(context_chunks)
     user_prompt = build_user_prompt(question, context)
 
     logger.debug("Sending prompt to Ollama (%d chars system, %d chars user)",
                  len(SYSTEM_PROMPT), len(user_prompt))
-    answer = await _call_ollama(SYSTEM_PROMPT, user_prompt)
+    answer = await _call_ollama(SYSTEM_PROMPT, user_prompt, history)
 
     return {
         "answer": answer,
