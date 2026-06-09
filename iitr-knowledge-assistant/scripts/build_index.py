@@ -12,9 +12,12 @@ from backend.indexing.build_index import build_and_save_index, ingest_document
 
 
 def main() -> None:
+    print(f"USING FAISS PATH: {settings.faiss_index_path}")
     print(f"Reading PDF: {settings.pdf_path}")
     chunks = ingest_document()
     print(f"  Created {len(chunks)} chunks.")
+    if chunks:
+        print(f"  Length of first chunk: {len(chunks[0]['text'])} characters")
 
     print("Building FAISS index (this may take a moment)...")
     _, chunks = build_and_save_index(chunks=chunks)

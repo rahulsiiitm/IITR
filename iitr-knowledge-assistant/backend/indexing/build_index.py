@@ -12,7 +12,7 @@ from backend.ingestion.pdf_loader import extract_pages
 
 
 def _get_encoder() -> SentenceTransformer:
-    return SentenceTransformer(settings.embedding_model)
+    return SentenceTransformer(settings.embedding_model, device="cpu")
 
 
 def ingest_document(pdf_path: Path | None = None) -> list[dict]:

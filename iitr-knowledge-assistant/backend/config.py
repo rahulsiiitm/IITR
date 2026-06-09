@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     subquestion_top_k: int = 3
     rerank_top_k: int = 3
     rerank_top_k_multi: int = 4
-    chunk_size: int = 1000
+    chunk_size: int = 2000
     chunk_overlap: int = 250
     confidence_threshold: float = -5.0
 

@@ -134,6 +134,19 @@ def select_reranked_per_page(
         # Drop subsequent candidates with scores below the confidence threshold to filter out noise
         if len(selected) > 0 and c.get("rerank_score", 0) < settings.confidence_threshold:
             continue
-        selected.append(c)
+            
+        # Pseudo-MMR: Jaccard similarity to prevent duplicate/redundant chunks
+        chunk_words = set(c["chunk"].lower().split())
+        is_duplicate = False
+        for s in selected:
+            s_words = set(s["chunk"].lower().split())
+            if not s_words: continue
+            overlap = len(chunk_words & s_words) / len(chunk_words | s_words)
+            if overlap > 0.4:  # 40% identical words = skip for diversity
+                is_duplicate = True
+                break
+                
+        if not is_duplicate:
+            selected.append(c)
 
     return selected[:k_val], reranked_raw
