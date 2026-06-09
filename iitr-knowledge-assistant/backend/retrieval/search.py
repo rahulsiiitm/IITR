@@ -12,7 +12,7 @@ _encoder: SentenceTransformer | None = None
 def get_encoder() -> SentenceTransformer:
     global _encoder
     if _encoder is None:
-        _encoder = SentenceTransformer(settings.embedding_model)
+        _encoder = SentenceTransformer(settings.embedding_model, device="cpu")
     return _encoder
 
 

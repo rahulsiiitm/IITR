@@ -10,7 +10,7 @@ _cross_encoder: CrossEncoder | None = None
 def get_cross_encoder() -> CrossEncoder:
     global _cross_encoder
     if _cross_encoder is None:
-        _cross_encoder = CrossEncoder(settings.rerank_model)
+        _cross_encoder = CrossEncoder(settings.rerank_model, device="cpu")
     return _cross_encoder
 
 
