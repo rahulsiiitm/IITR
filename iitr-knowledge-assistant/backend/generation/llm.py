@@ -56,6 +56,9 @@ async def ask(question: str, context_chunks: list[dict], history: list[dict] = N
                  len(SYSTEM_PROMPT), len(user_prompt))
     answer = await _call_ollama(SYSTEM_PROMPT, user_prompt, history)
 
+    if "Answer:" in answer:
+        answer = answer.split("Answer:")[-1].strip()
+
     return {
         "answer": answer,
         "sources": _format_sources(context_chunks),

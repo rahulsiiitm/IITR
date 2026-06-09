@@ -64,7 +64,7 @@ class AskResponse(BaseModel):
     session_id: str | None = None
 
 
-NOT_AVAILABLE = "This information is not available in the provided document."
+NOT_AVAILABLE = "The regulations do not explicitly state this."
 
 
 def _get_index_state(request: Request) -> tuple[Any, list[dict]]:
@@ -187,7 +187,9 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             "not provided here",
             "is not provided",
             "no information",
-            "does not contain information"
+            "does not contain information",
+            "the regulations do not explicitly state this",
+            "regulations do not explicitly state this",
         ]
         if any(ind in ans_text_lower for ind in na_indicators):
             ans_text = NOT_AVAILABLE

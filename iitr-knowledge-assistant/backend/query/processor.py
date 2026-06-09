@@ -35,9 +35,10 @@ QUERY_EXPANSIONS = {
     "warnings": "warning unsatisfactory progress report academic affairs office R.8",
     "unsatisfactory": "unsatisfactory progress report academic affairs office academic registration cancelled units R.8",
     # Comprehensive Examination Attempts (Page 31)
-    "attempt": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
     "attempts": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
     "twice": "comprehensive examination attempts twice maximum attempts candidate avail to clear r.7",
+    "supervisor": "supervisor guide faculty co-supervisor maximum number at most two co-supervisors",
+    "co-supervisor": "supervisor guide faculty co-supervisor maximum number at most two co-supervisors",
 }
 
 

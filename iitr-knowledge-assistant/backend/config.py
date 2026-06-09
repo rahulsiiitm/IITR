@@ -37,10 +37,10 @@ class Settings(BaseSettings):
     ollama_model: str = "phi4-mini:latest"
     ollama_url: str = "http://localhost:11434/api/chat"
 
-    top_k: int = 15
-    subquestion_top_k: int = 6
-    rerank_top_k: int = 6
-    rerank_top_k_multi: int = 8
+    top_k: int = 4
+    subquestion_top_k: int = 3
+    rerank_top_k: int = 3
+    rerank_top_k_multi: int = 4
     chunk_size: int = 1000
     chunk_overlap: int = 250
     confidence_threshold: float = -5.0
