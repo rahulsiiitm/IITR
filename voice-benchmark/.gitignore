@@ -1,0 +1,8 @@
+.env
+tts-env/
+__pycache__/
+coqui-env/
+melo-env/
+piper-env/
+tts-piper-env/
+tts-xtts-env/   
