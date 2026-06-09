@@ -202,15 +202,15 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                 [SourceItem(**s) for s in result["sources"]],
             )
 
-        if settings.debug:
-            response.debug = [
-                DebugChunk(
-                    chunk=c["chunk"][:200] + "..." if len(c["chunk"]) > 200 else c["chunk"],
-                    page=c["page"],
-                    rerank_score=round(c.get("rerank_score", 0), 3),
-                )
-                for c in reranked
-            ]
+        # Always include debug info with full chunks so the user can see exactly what was retrieved
+        response.debug = [
+            DebugChunk(
+                chunk=c["chunk"],
+                page=c["page"],
+                rerank_score=round(c.get("rerank_score", 0), 3),
+            )
+            for c in expanded
+        ]
 
         return response
 

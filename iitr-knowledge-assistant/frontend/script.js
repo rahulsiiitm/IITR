@@ -59,31 +59,58 @@ function handleMessage(text) {
 }
 
 function addMsg(text, type, sources, debug) {
+  const wrapper = document.createElement('div');
+  wrapper.className = `msg-wrapper ${type}`;
+
   const div = document.createElement('div');
-  div.className = `msg ${type}`;
+  div.className = `msg`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  if (type === 'user') {
+    avatar.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  } else {
+    avatar.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>`;
+  }
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'msg-content';
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'msg-text';
 
   if (type === 'user') {
-    div.textContent = text;
+    textDiv.textContent = text;
   } else if (typeof marked !== 'undefined') {
     marked.setOptions({ breaks: true, gfm: true });
-    div.innerHTML = marked.parse(text);
+    textDiv.innerHTML = marked.parse(text);
   } else {
-    div.textContent = text;
+    textDiv.textContent = text;
   }
+  
+  contentDiv.appendChild(textDiv);
 
   if (type === 'bot' && sources && sources.length) {
     const sourceContainer = document.createElement('div');
     sourceContainer.className = 'source-container';
 
+    const grouped = {};
     sources.forEach((source) => {
-      const pill = document.createElement('span');
-      pill.className = 'source-pill';
       const docName = source.document || 'Document';
-      pill.innerHTML = `📄 ${docName} — Page ${source.page}`;
-      sourceContainer.appendChild(pill);
+      if (!grouped[docName]) grouped[docName] = [];
+      grouped[docName].push(source.page);
     });
 
-    div.appendChild(sourceContainer);
+    for (const [docName, pages] of Object.entries(grouped)) {
+      const pill = document.createElement('span');
+      pill.className = 'source-pill';
+      const uniquePages = [...new Set(pages)].sort((a, b) => a - b);
+      const pageText = uniquePages.length === 1 ? 'Page' : 'Pages';
+      pill.innerHTML = `📄 ${docName} — ${pageText} ${uniquePages.join(', ')}`;
+      sourceContainer.appendChild(pill);
+    }
+
+    contentDiv.appendChild(sourceContainer);
   }
 
   if (type === 'bot' && debug && debug.length) {
@@ -117,21 +144,39 @@ function addMsg(text, type, sources, debug) {
         : `<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none" style="margin-right:4px;"><polyline points="6 9 12 15 18 9"/></svg> Hide retrieved chunks`;
     });
 
-    div.appendChild(toggle);
-    div.appendChild(panel);
+    contentDiv.appendChild(toggle);
+    contentDiv.appendChild(panel);
   }
 
-  chatArea.appendChild(div);
+  div.appendChild(avatar);
+  div.appendChild(contentDiv);
+  wrapper.appendChild(div);
+  chatArea.appendChild(wrapper);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function addLoader() {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg-wrapper bot loader-msg';
+  
   const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
-  chatArea.appendChild(div);
+  div.className = 'msg';
+  
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>`;
+  
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'msg-content';
+  contentDiv.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
+  
+  div.appendChild(avatar);
+  div.appendChild(contentDiv);
+  wrapper.appendChild(div);
+  
+  chatArea.appendChild(wrapper);
   chatArea.scrollTop = chatArea.scrollHeight;
-  return div;
+  return wrapper;
 }
 
 function escapeHtml(unsafe) {
