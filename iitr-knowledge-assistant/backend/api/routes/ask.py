@@ -163,7 +163,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             return make_response(NOT_AVAILABLE, [])
             
         for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean", "ranking", "enrolled", "enrollment", "mess"]:
-            if kw in q_lower and kw not in context_text:
+            if kw in q_lower:
                 return make_response(NOT_AVAILABLE, [])
 
         async with llm_semaphore:
@@ -189,7 +189,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             "no information",
             "does not contain information"
         ]
-        if any(ind in ans_text_lower for ind in na_indicators) and len(ans_text_lower) < 200:
+        if any(ind in ans_text_lower for ind in na_indicators):
             ans_text = NOT_AVAILABLE
 
         if ans_text == NOT_AVAILABLE:

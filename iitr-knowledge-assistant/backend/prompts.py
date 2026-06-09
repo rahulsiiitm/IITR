@@ -1,3 +1,5 @@
+import re
+
 SYSTEM_PROMPT = """You are the official IIT Roorkee PhD Regulations Assistant.
 
 Your personality:
@@ -39,7 +41,6 @@ Question:
 {question}"""
 
     q_lower = question.lower()
-    import re
     has_number = bool(re.search(r"\d", question))
     
     is_eligibility = any(w in q_lower for w in ["eligible", "qualify", "apply", "admission", "candidacy", "exempt"])

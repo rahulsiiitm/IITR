@@ -49,13 +49,11 @@ def main():
         print(f"Error: FastAPI server is not running on port {args.port}. Cannot run tests. ({e})")
         sys.exit(1)
 
-    test_files = {
-        "admission": "tests/admission.json",
-        "gate": "tests/gate.json",
-        "candidacy": "tests/candidacy.json",
-        "thesis": "tests/thesis.json",
-        "hallucination": "tests/hallucination.json"
-    }
+    import glob
+    test_files = {}
+    for path in glob.glob("tests/*.json"):
+        category = os.path.splitext(os.path.basename(path))[0]
+        test_files[category] = path
 
     results = []
     
