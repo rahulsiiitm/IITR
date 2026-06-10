@@ -53,7 +53,7 @@ CRITICAL RULES:
 5. EXTRACT ALL: Extract EVERY relevant numerical rule or explicit statement from the Context. Do not stop after finding the first match.
 6. IGNORE VAGUE PREAMBLES: If a sentence is completely vague and contains no actual numbers or explicit rules (e.g., "as the Board may approve"), ignore it and look deeper in the text for the actual numerical rule.
 7. NO INFERRING OR GUESSING: If the Context does not explicitly contain the exact numerical answer or rule, you MUST output EXACTLY: "NO_EVIDENCE". Do not attempt to guess, infer, or combine unrelated concepts (like financial assistance) to create an answer.
-6. ACADEMIC TIMELINES: If the user asks about "duration", "time", or "how long", you MUST extract any explicit rules regarding "working period", "submission of thesis limits", or "candidacy limits". Do not reject these just because the text uses "working period" instead of "duration".
+8. ACADEMIC TIMELINES: If the user asks about "duration", "time", "minimum", or "maximum", you MUST extract ALL related timeline rules (including "working period", "submission of thesis", or "candidacy limits") present in the Context. Do not reject a "maximum" rule just because the user asked for "minimum", or vice versa. Provide the full picture.
 
 You MUST format your output exactly like this:
 
@@ -80,6 +80,7 @@ CRITICAL CONSTRAINTS:
 2. PRESERVE RESTRICTIONS: If the answer contains restrictions ("jointly", "only", "must", "shall", "at most", "maximum", "minimum"), preserve them exactly.
 3. LOGICAL DEDUCTION IS ALLOWED: You must perform basic math and logical deductions (e.g., if a rule says "maximum 8 months", answering "No, the maximum is 8 months" to a question about "10 months" is correct).
 4. If the Evidence is completely silent on the topic, return EXACTLY: "The regulations do not explicitly state this." Do not attempt to guess.
+5. COMPREHENSIVE TIMELINES: If the user asks about duration or timelines, and the Evidence provides both candidacy limits (e.g., 18 months) and thesis limits (e.g., 2 years), explain both clearly to avoid confusion.
 
 ELIGIBILITY EVALUATION PROCEDURE:
 ONLY when the user query asks if a specific candidate qualifies or is eligible, you MUST follow this exact format:

@@ -31,7 +31,8 @@ QUERY_EXPANSIONS = {
     "minimum duration": "minimum working period thesis submission candidacy duration R.8",
     "working period": "minimum working period thesis submission candidacy duration R.8",
     "minimum working": "minimum working period thesis submission candidacy duration R.8",
-    "maximum duration": "Maximum Duration for Thesis Submission five years full-time six years part-time",
+    "maximum duration": "Maximum duration for completing candidacy 18 months Maximum Duration for Thesis Submission five years full-time six years part-time",
+    "candidacy duration": "Maximum duration for completing candidacy 18 months",
     # Performance Monitoring / Warnings / Unsatisfactory Progress (Page 32)
     "warning": "warning unsatisfactory progress report academic affairs office R.8",
     "warnings": "warning unsatisfactory progress report academic affairs office R.8",
