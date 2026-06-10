@@ -23,7 +23,6 @@ from backend.query.shortcuts import (
     check_greeting,
     check_vague_requirements,
     check_admission_numerical_shortcut,
-    check_phd_duration_shortcut,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
 
@@ -110,10 +109,6 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     if vague:
         return make_response(vague, [])
 
-    phd_duration = check_phd_duration_shortcut(question)
-    if phd_duration:
-        return make_response(phd_duration["answer"], [SourceItem(**s) for s in phd_duration["sources"]])
-
     acronym = check_acronym_shortcut(question)
     if acronym:
         return make_response(acronym["answer"], [SourceItem(**s) for s in acronym["sources"]])
@@ -158,8 +153,8 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                     all_expanded.append(chunk)
 
             # Extract evidence strictly for this sub-query
-            top_expanded = sorted(expanded, key=lambda c: c.get("rerank_score", -999), reverse=True)[:3]
-            evidence_text = await extract_evidence(q, top_expanded)
+            # Pass only the top 2 candidate chunks directly from reranked to avoid confusing the Extractor with preambles
+            evidence_text = await extract_evidence(q, reranked[:2])
             if evidence_text and "NO_EVIDENCE" not in evidence_text.upper():
                 all_evidence.append(evidence_text)
 
