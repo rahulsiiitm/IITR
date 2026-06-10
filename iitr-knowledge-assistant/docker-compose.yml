@@ -19,3 +19,19 @@ services:
       - ./data:/app/data
       - ./vector_db:/app/vector_db
     restart: always
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: sutra_postgres
+    environment:
+      POSTGRES_USER: sutra_admin
+      POSTGRES_PASSWORD: sutra_secure_password
+      POSTGRES_DB: sutra_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - sutra_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  sutra_pg_data:

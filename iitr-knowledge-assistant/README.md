@@ -1,4 +1,4 @@
-# IITR Knowledge Assistant
+# Sutra: IITR Knowledge Assistant
 
 An institution-wide AI assistant that answers questions from official IIT Roorkee documents using local/offline AI models.
 
@@ -7,8 +7,8 @@ An institution-wide AI assistant that answers questions from official IIT Roorke
 ## Architecture
 
 ```
-User → Frontend → FastAPI → Query Processing → FAISS Search → Re-ranking
-     → Context Builder → Ollama (Mistral) → Answer + Sources
+User → Frontend → FastAPI → PostgreSQL (Session Check) → Query Processing (Rewriter) 
+     → FAISS Search → Re-ranking → Context Builder → Ollama (Qwen2.5 7B) → Answer + Sources
 ```
 
 Persistent vector index stored under `vector_db/`. No cloud APIs — fully offline after models are downloaded.
@@ -16,9 +16,9 @@ Persistent vector index stored under `vector_db/`. No cloud APIs — fully offli
 ## Prerequisites
 
 - Python 3.11+
-- [Ollama](https://ollama.com/) with `mistral:latest` pulled:
+- [Ollama](https://ollama.com/) with `qwen2.5:7b-instruct-q4_K_M` pulled:
   ```bash
-  ollama pull mistral:latest
+  ollama pull qwen2.5:7b-instruct-q4_K_M
   ```
 
 ## Setup
@@ -111,7 +111,7 @@ venv/bin/python tests/run_in_memory_tests.py
 | Phase | Status | Details |
 |-------|--------|---------|
 | 1 — Single PDF prototype | Done | Basic retrieval prototype |
-| 2 — Hybrid Retrieval (BM25 + FAISS + RRF) & Reranking | **Done** | RRF fusion, query expansions, numerical shortcuts, in-memory testing (**100% Accuracy, 0% Hallucinations**) |
-| 3 — FastAPI + PostgreSQL + chat history | Planned | Session management, chat logs database, thumbs up/down feedback |
+| 2 — Hybrid Retrieval (BM25 + FAISS + RRF) & Reranking | Done | RRF fusion, query expansions, numerical shortcuts, in-memory testing (**100% Accuracy, 0% Hallucinations**) |
+| 3 — FastAPI + PostgreSQL + chat history | **Done** | SQLAlchemy asyncpg integration, Dockerized PostgreSQL database, chat session management |
 | 4 — Admin dashboard, upload, analytics | Planned | Monitoring performance, upload new files, update search index |
 | 5 — Production deployment (Docker, Windows Server) | Planned | Docker compose, production builds |

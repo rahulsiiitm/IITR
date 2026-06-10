@@ -47,6 +47,8 @@ class Settings(BaseSettings):
 
     api_port: int = 45123
     api_key: str | None = None
+    
+    database_url: str = "postgresql+asyncpg://sutra_admin:sutra_secure_password@localhost:5432/sutra_db"
 
     debug: bool = False
     log_level: str = "INFO"

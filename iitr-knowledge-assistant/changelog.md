@@ -4,6 +4,19 @@ All notable changes to the **IITR Knowledge Assistant** project are documented h
 
 ---
 
+## [1.2.0] - 2026-06-10
+
+### Added
+- **Sutra Persona**: Gave the assistant the official identity of "Sutra", with tailored frontend UI modifications and dynamic backend system prompts to maintain an articulate, academic demeanor.
+- **PostgreSQL Infrastructure**: Initialized institutional-grade database architecture using SQLAlchemy and `asyncpg` within an isolated `docker-compose` PostgreSQL container, paving the way for persistent session and conversation history.
+- **Smart Query Rewriter**: Completely overhauled the LLM-based query rewriter to extract pronouns natively, translate casual queries into academic jargon (e.g. "guide" to "supervisor"), and explicitly strip conversational filler prior to FAISS processing.
+
+### Changed
+- **Model Upgrade**: Switched the primary generative model from `mistral:latest` to `qwen2.5:7b-instruct-q4_K_M` to drastically improve semantic rewriting and logical intent capture.
+- **Evidence Extractor Tuning**: Constrained the extraction context window to only the Top 2 reranked chunks via FlashRank to eliminate hallucinated assumptions.
+
+---
+
 ## [1.1.0] - 2026-06-06
 
 ### Changed

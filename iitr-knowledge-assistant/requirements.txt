@@ -10,3 +10,6 @@ langchain-text-splitters
 numpy
 httpx
 slowapi
+SQLAlchemy>=2.0.0
+asyncpg>=0.28.0
+alembic>=1.12.0

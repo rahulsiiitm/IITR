@@ -1,0 +1,54 @@
+# Sutra Database Migrations
+
+This directory contains Alembic migration scripts for the Sutra backend.
+
+## Setup
+
+1. Install dependencies:
+
+   ```bash
+   pip install alembic sqlalchemy
+   ```
+
+2. Initialize Alembic (if not already initialized):
+
+   ```bash
+   alembic init alembic
+   ```
+
+   This will create the `alembic.ini` configuration file and `alembic/versions` directory.
+
+## Configuration
+
+Edit `alembic.ini` to match your database connection:
+
+```ini
+[alembic]
+sqlalchemy.url = postgres+asyncpg://sutra_admin:sutra_secure_password@localhost:5432/sutra_db
+
+[env]
+script_location = alembic
+
+# Enable async support
+sqlalchemy.asyncio.use_async = true
+```
+
+## Usage
+
+### Create a new migration
+
+```bash
+alembic revision --autogenerate -m "descriptive message"
+```
+
+### Apply migrations
+
+```bash
+alembic upgrade head
+```
+
+### Rollback
+
+```bash
+alembic downgrade -1
+```
