@@ -1,17 +1,17 @@
 import re
 
-from sentence_transformers import CrossEncoder
+from flashrank import Ranker, RerankRequest
 
 from backend.config import settings
 
-_cross_encoder: CrossEncoder | None = None
+_ranker: Ranker | None = None
 
 
-def get_cross_encoder() -> CrossEncoder:
-    global _cross_encoder
-    if _cross_encoder is None:
-        _cross_encoder = CrossEncoder(settings.rerank_model, device="cpu")
-    return _cross_encoder
+def get_ranker() -> Ranker:
+    global _ranker
+    if _ranker is None:
+        _ranker = Ranker()
+    return _ranker
 
 
 def _query_variants(query: str) -> list[str]:
@@ -59,15 +59,18 @@ def rerank(
     if not candidates:
         return []
 
-    cross_encoder = get_cross_encoder()
+    ranker = get_ranker()
     all_queries = _query_variants(query)
+
+    passages = [{"id": i, "text": c["chunk"], "meta": c} for i, c in enumerate(candidates)]
 
     best_scores = [-999.0] * len(candidates)
     for q in all_queries:
-        pairs = [(q, c["chunk"]) for c in candidates]
-        scores = cross_encoder.predict(pairs)
-        for idx, score in enumerate(scores):
-            best_scores[idx] = max(best_scores[idx], float(score))
+        req = RerankRequest(query=q, passages=passages)
+        results = ranker.rerank(req)
+        for res in results:
+            idx = res["id"]
+            best_scores[idx] = max(best_scores[idx], float(res["score"]))
 
     q_lower = query.lower()
     is_epe_query = (
@@ -109,7 +112,8 @@ def check_confidence(candidates: list[dict], query: str = "") -> bool:
     if any(kw in q for kw in procedural_keywords):
         threshold = -6.0  # relaxed: any semantically near-miss chunk is allowed
     else:
-        threshold = settings.confidence_threshold
+        # FlashRank uses positive scores (typically 0.0 to 1.0)
+        threshold = 0.0 if settings.confidence_threshold < 0 else settings.confidence_threshold
 
     return best_score > threshold
 

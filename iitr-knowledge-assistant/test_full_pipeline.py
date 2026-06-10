@@ -41,7 +41,7 @@ async def main():
                 seen_texts.add(chunk_text)
                 all_expanded.append(chunk)
 
-        evidence_text = await extract_evidence(q, expanded)
+        evidence_text = await extract_evidence(q, reranked[:2])
         print("EXTRACTED EVIDENCE FOR Q:", q)
         print(evidence_text)
         if evidence_text and "NO_EVIDENCE" not in evidence_text.upper():

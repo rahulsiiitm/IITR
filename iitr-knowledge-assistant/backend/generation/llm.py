@@ -5,6 +5,7 @@ import httpx
 from backend.config import settings
 from backend.generation.context_builder import build_context
 from backend.prompts import EVIDENCE_EXTRACTOR_PROMPT, SYSTEM_PROMPT, VERIFIER_PROMPT, build_greeting_prompt, build_user_prompt
+from backend.generation.rewriter import rewrite_query
 
 logger = logging.getLogger(__name__)
 
@@ -47,21 +48,30 @@ def _format_sources(context_chunks: list[dict]) -> list[dict]:
     return sorted(sources, key=lambda s: s["page"])
 
 
-async def ask(question: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
-    """Generate an answer using Ollama with RAG context asynchronously."""
+async def extract_evidence(question: str, context_chunks: list[dict]) -> str:
+    """Extract evidence from context chunks for a specific query."""
     context = build_context(context_chunks)
     if context_chunks:
-        print(f"Retrieved Chunk 1 Length: {len(context_chunks[0].get('chunk', context_chunks[0].get('text', '')))}")
-    # Step 1: Evidence Extraction
-    extractor_user = f"Context:\n{context}\n\nQuestion:\n{question}\n\nQuotations:"
+        print(f"Retrieving evidence for: '{question}' (Chunk 1 Length: {len(context_chunks[0].get('chunk', context_chunks[0].get('text', '')))})")
+    
+    extractor_user = (
+        f"Context:\n{context}\n\n"
+        f"Question:\n{question}\n\n"
+        f"Extract the exact quotes. Begin your response exactly with this tag:\n"
+        f"<thinking>"
+    )
     evidence = await _call_ollama(EVIDENCE_EXTRACTOR_PROMPT, extractor_user)
 
-    print(f"--- EXTRACTED EVIDENCE ---\n{evidence}\n--------------------------")
+    print(f"--- EXTRACTED EVIDENCE for '{question}' ---\n{evidence}\n--------------------------")
     
     match = re.search(r"<evidence>(.*?)</evidence>", evidence, re.DOTALL | re.IGNORECASE)
     evidence_text = match.group(1).strip() if match else evidence.strip()
+    return evidence_text
 
-    if "NO_EVIDENCE" in evidence_text.upper() or not evidence_text:
+
+async def generate_from_evidence(question: str, evidence_text: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
+    """Generate final answer using the aggregated evidence."""
+    if "NO_EVIDENCE" in evidence_text.upper() or not evidence_text.strip():
         return {
             "answer": "The regulations do not explicitly state this.",
             "sources": _format_sources(context_chunks),

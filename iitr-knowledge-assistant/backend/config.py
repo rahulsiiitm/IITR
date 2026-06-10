@@ -34,13 +34,13 @@ class Settings(BaseSettings):
 
     embedding_model: str = "BAAI/bge-base-en-v1.5"
     rerank_model: str = "BAAI/bge-reranker-base"
-    ollama_model: str = "phi4-mini:latest"
+    ollama_model: str = "qwen2.5:7b-instruct-q4_K_M"
     ollama_url: str = "http://localhost:11434/api/chat"
 
-    top_k: int = 4
-    subquestion_top_k: int = 3
-    rerank_top_k: int = 3
-    rerank_top_k_multi: int = 4
+    top_k: int = 15
+    subquestion_top_k: int = 10
+    rerank_top_k: int = 5
+    rerank_top_k_multi: int = 5
     chunk_size: int = 2000
     chunk_overlap: int = 250
     confidence_threshold: float = -5.0
