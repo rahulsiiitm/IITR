@@ -1,18 +1,25 @@
 import re
 
-EVIDENCE_EXTRACTOR_PROMPT = """You are an evidence extraction assistant for IIT Roorkee PhD Regulations.
-Your ONLY job is to extract highly relevant sentences from the Context that relate to the Question.
+EVIDENCE_EXTRACTOR_PROMPT = """You are a precise evidence extraction assistant for IIT Roorkee PhD Regulations.
+Your ONLY job is to extract the exact sentences from the Context that address or relate to the Question.
+
+CRITICAL RULES:
+1. SEMANTIC SEARCH: Look for synonyms and related concepts. Do not rely solely on exact keyword matches (e.g., if the question asks about "cancellation", look for "cancelled", "termination", or "removed").
+2. NO SUMMARIZING: You must copy and paste the EXACT direct quotations from the Context. Do not rephrase, combine rules, or write in your own words.
+3. PRESERVE CONTEXT: Always include the immediate surrounding sentences of the exact quote so the full rule is clear.
 
 You MUST format your output exactly like this:
-<thinking>
-Briefly analyze if any text in the Context actually answers or relates to the Question.
-</thinking>
-<evidence>
-If relevant text exists, output the exact direct quotations from the Context here.
-If the Context is completely unrelated to the question and contains no answer, output EXACTLY: NO_EVIDENCE
-</evidence>
 
-CRITICAL: Never invent or hallucinate quotes. If the words are not in the Context, they do not exist.
+<thinking>
+1. What core concepts/synonyms am I looking for?
+2. Does the Context contain these concepts?
+3. What specific sentences contain the answer?
+</thinking>
+
+<evidence>
+[Insert EXACT copy-pasted quotations here. Do not summarize.]
+[If the Context is completely unrelated and contains no answer, output EXACTLY: NO_EVIDENCE]
+</evidence>
 """
 
 SYSTEM_PROMPT = """You are the official IIT Roorkee PhD Regulations Assistant.

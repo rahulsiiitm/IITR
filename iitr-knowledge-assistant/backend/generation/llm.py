@@ -1,3 +1,4 @@
+import re
 import logging
 
 import httpx
@@ -25,7 +26,7 @@ async def _call_ollama(system: str, user: str, history: list[dict] = None) -> st
                 "options": {
                     "temperature": 0.0,
                     "repeat_penalty": 1.1,
-                    "num_predict": 250,
+                    "num_predict": 1000,
                 },
             },
         )
@@ -54,13 +55,12 @@ async def ask(question: str, context_chunks: list[dict], history: list[dict] = N
         print(f"Retrieved Chunk 1 Length: {len(context_chunks[0].get('chunk', context_chunks[0].get('text', '')))}")
     # Step 1: Evidence Extraction
     extractor_user = f"Context:\n{context}\n\nQuestion:\n{question}\n\nQuotations:"
-    evidence = await _call_ollama(EVIDENCE_EXTRACTOR_PROMPT, extractor_user)
+    raw_evidence = await _call_ollama(EVIDENCE_EXTRACTOR_PROMPT, extractor_user)
 
-    print(f"--- EXTRACTED EVIDENCE ---\n{evidence}\n--------------------------")
+    print(f"--- EXTRACTED EVIDENCE ---\n{raw_evidence}\n--------------------------")
     
-    import re
-    match = re.search(r"<evidence>(.*?)</evidence>", evidence, re.DOTALL | re.IGNORECASE)
-    evidence_text = match.group(1).strip() if match else evidence.strip()
+    match = re.search(r'<(?:evidence|quotation)>(.*?)</(?:evidence|quotation)>', raw_evidence, re.DOTALL | re.IGNORECASE)
+    evidence_text = match.group(1).strip() if match else raw_evidence.strip()
 
     if "NO_EVIDENCE" in evidence_text.upper() or not evidence_text:
         return {
