@@ -10,7 +10,11 @@ from pydantic import BaseModel, Field
 from backend.api.limiter import limiter
 from backend.config import settings
 
-session_history: dict[str, list[dict]] = {}
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from backend.database import get_db
+from backend.models import Session, Message
+import json
 
 from backend.generation.llm import extract_evidence, generate_from_evidence
 from backend.generation.rewriter import rewrite_query
@@ -81,49 +85,60 @@ def _get_index_state(request: Request) -> tuple[Any, list[dict]]:
 
 @router.post("/ask", response_model=AskResponse)
 @limiter.limit("20/minute")
-async def ask_question(body: AskRequest, request: Request, api_key: str = Depends(get_api_key)) -> AskResponse:
+async def ask_question(body: AskRequest, request: Request, api_key: str = Depends(get_api_key), db: AsyncSession = Depends(get_db)) -> AskResponse:
     question = body.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="No question provided")
 
-    session_id = body.session_id or str(uuid.uuid4())
-    if session_id not in session_history:
-        session_history[session_id] = []
-    
-    history = session_history[session_id]
+    session_id = body.session_id
+    if session_id:
+        db_session = await db.get(Session, session_id)
+        if not db_session:
+            db_session = Session(id=session_id)
+            db.add(db_session)
+            await db.commit()
+    else:
+        db_session = Session(id=str(uuid.uuid4()))
+        db.add(db_session)
+        await db.commit()
+        session_id = db_session.id
+
+    result = await db.execute(select(Message).where(Message.session_id == session_id).order_by(Message.created_at))
+    db_messages = result.scalars().all()
+    history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
 
     timer = RequestTimer()
 
-    def make_response(ans: str, srcs: list) -> AskResponse:
-        history.append({"role": "user", "content": question})
-        history.append({"role": "assistant", "content": ans})
-        if len(history) > 10:
-            session_history[session_id] = history[-10:]
+    async def make_response(ans: str, srcs: list) -> AskResponse:
+        user_msg = Message(session_id=session_id, role="user", content=question)
+        asst_msg = Message(session_id=session_id, role="assistant", content=ans, sources=[s.model_dump() for s in srcs])
+        db.add_all([user_msg, asst_msg])
+        await db.commit()
         return AskResponse(answer=ans, sources=srcs, session_id=session_id)
 
     greeting = check_greeting(question)
     if greeting:
-        return make_response(greeting["answer"], [SourceItem(**s) for s in greeting["sources"]])
+        return await make_response(greeting["answer"], [SourceItem(**s) for s in greeting["sources"]])
 
     vague = check_vague_requirements(question)
     if vague:
-        return make_response(vague, [])
+        return await make_response(vague, [])
 
     acronym = check_acronym_shortcut(question)
     if acronym:
-        return make_response(acronym["answer"], [SourceItem(**s) for s in acronym["sources"]])
+        return await make_response(acronym["answer"], [SourceItem(**s) for s in acronym["sources"]])
 
     shortcut = check_cgpa_gate_shortcut(question)
     if shortcut:
-        return make_response(shortcut["answer"], [SourceItem(**s) for s in shortcut["sources"]])
+        return await make_response(shortcut["answer"], [SourceItem(**s) for s in shortcut["sources"]])
 
     adm_num = check_admission_numerical_shortcut(question)
     if adm_num:
-        return make_response(adm_num["answer"], [SourceItem(**s) for s in adm_num["sources"]])
+        return await make_response(adm_num["answer"], [SourceItem(**s) for s in adm_num["sources"]])
 
     candidacy_shortcut = check_candidacy_cgpa_shortcut(question)
     if candidacy_shortcut:
-        return make_response(candidacy_shortcut["answer"], [SourceItem(**s) for s in candidacy_shortcut["sources"]])
+        return await make_response(candidacy_shortcut["answer"], [SourceItem(**s) for s in candidacy_shortcut["sources"]])
 
 
 
@@ -175,7 +190,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         )
 
         if not is_confident:
-            return make_response(NOT_AVAILABLE, [])
+            return await make_response(NOT_AVAILABLE, [])
 
         # Entity-presence validation to block hallucinations on out-of-domain queries
         context_text = "\n".join(c["chunk"].lower() for c in all_expanded)
@@ -183,17 +198,17 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         
         # Block queries containing students enrollment count queries
         if "how many students" in q_lower or "number of students" in q_lower:
-            return make_response(NOT_AVAILABLE, [])
+            return await make_response(NOT_AVAILABLE, [])
 
         # Block specific out-of-domain or unanswerable queries
         if "director" in q_lower and ("who is" in q_lower or "name" in q_lower):
-            return make_response(NOT_AVAILABLE, [])
+            return await make_response(NOT_AVAILABLE, [])
         if "average cgpa" in q_lower or "average marks" in q_lower:
-            return make_response(NOT_AVAILABLE, [])
+            return await make_response(NOT_AVAILABLE, [])
             
         for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean", "ranking", "enrolled", "enrollment", "mess"]:
             if kw in q_lower:
-                return make_response(NOT_AVAILABLE, [])
+                return await make_response(NOT_AVAILABLE, [])
 
         async with llm_semaphore:
             result = await generate_from_evidence(question, merged_evidence, all_expanded, history)
@@ -224,9 +239,9 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
             ans_text = NOT_AVAILABLE
 
         if ans_text == NOT_AVAILABLE:
-            response = make_response(NOT_AVAILABLE, [])
+            response = await make_response(NOT_AVAILABLE, [])
         else:
-            response = make_response(
+            response = await make_response(
                 ans_text,
                 [SourceItem(**s) for s in result["sources"]],
             )
