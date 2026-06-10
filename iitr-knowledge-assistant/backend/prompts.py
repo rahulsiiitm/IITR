@@ -7,17 +7,18 @@ CRITICAL RULES:
 1. SEMANTIC SEARCH: Look for synonyms and related concepts. Do not rely solely on exact keyword matches (e.g., if the question asks about "cancellation", look for "cancelled", "termination", or "removed").
 2. NO SUMMARIZING: You must copy and paste the EXACT direct quotations from the Context. Do not rephrase, combine rules, or write in your own words.
 3. PRESERVE CONTEXT: Always include the immediate surrounding sentences of the exact quote so the full rule is clear.
+4. PARAGRAPH HANDLING: If a relevant rule spans multiple sentences or lines, copy the entire continuous span that contains the rule. Do not break a single rule across multiple <evidence> sections.
 
 You MUST format your output exactly like this:
 
 <thinking>
 1. What core concepts/synonyms am I looking for?
 2. Does the Context contain these concepts?
-3. What specific sentences contain the answer?
+3. What specific sentences/lines contain the answer? (Identify the exact continuous span)
 </thinking>
 
 <evidence>
-[Insert EXACT copy-pasted quotations here. Do not summarize.]
+[Insert EXACT copy-pasted quotation from Context here. Include the full continuous text of the rule, even if it spans multiple sentences or lines.]
 [If the Context is completely unrelated and contains no answer, output EXACTLY: NO_EVIDENCE]
 </evidence>
 """
