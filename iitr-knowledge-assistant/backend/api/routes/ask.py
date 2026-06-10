@@ -105,7 +105,10 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
     result = await db.execute(select(Message).where(Message.session_id == session_id).order_by(Message.created_at))
     db_messages = result.scalars().all()
-    history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
+    # history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
+    
+    # User requested stateless testing mode: do not read previous context.
+    history = []
 
     timer = RequestTimer()
 
