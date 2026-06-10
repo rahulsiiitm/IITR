@@ -11,7 +11,7 @@ def check_greeting(question: str) -> dict | None:
     if re.match(r"^(hi+|hello+|hey+|yo|sup|greetings)( there)?$", q_lower):
         return {
             "answer": (
-                "Hello! I'm the official IIT Roorkee PhD Knowledge Assistant. "
+                "Hello! I'm Sutra, the official IIT Roorkee PhD Regulations Assistant. "
                 "I can answer questions about PhD admissions, coursework, candidacy, "
                 "thesis evaluation, and other academic regulations based on the rulebook."
             ),
@@ -22,7 +22,7 @@ def check_greeting(question: str) -> dict | None:
     if re.match(r"^(who|what)\s+(are|r)\s+(you|u)(.*)?$", q_lower) or re.match(r"^(introduce|tell me about)\s+(yourself|urself)(.*)?$", q_lower):
         return {
             "answer": (
-                "I am the official IIT Roorkee PhD Knowledge Assistant. "
+                "I am Sutra, the official IIT Roorkee PhD Regulations Assistant. "
                 "I am an AI trained specifically on the IIT Roorkee PhD Regulations rulebook. "
                 "I can help you understand admission requirements, GATE exemptions, coursework, "
                 "candidacy rules, and the complete thesis evaluation process."
