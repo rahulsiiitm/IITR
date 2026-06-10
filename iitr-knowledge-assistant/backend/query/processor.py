@@ -27,6 +27,8 @@ QUERY_EXPANSIONS = {
     "admission process": "Admission Procedure short-listing criteria written test and/or interview A.4",
     "admission procedure": "Admission Procedure short-listing criteria written test and/or interview A.4",
     # Working period / thesis submission duration (Page 34)
+    "duration": "minimum working period thesis submission candidacy duration R.8",
+    "minimum duration": "minimum working period thesis submission candidacy duration R.8",
     "working period": "minimum working period thesis submission candidacy duration R.8",
     "minimum working": "minimum working period thesis submission candidacy duration R.8",
     "maximum duration": "Maximum Duration for Thesis Submission five years full-time six years part-time",

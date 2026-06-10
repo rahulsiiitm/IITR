@@ -8,11 +8,12 @@ from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, Field
 
 from backend.api.limiter import limiter
+from backend.config import settings
 
 session_history: dict[str, list[dict]] = {}
 
-from backend.config import settings
-from backend.generation.llm import ask as generate_answer
+from backend.generation.llm import extract_evidence, generate_from_evidence
+from backend.generation.rewriter import rewrite_query
 from backend.logging.analytics import RequestTimer, log_ask_request
 from backend.query.processor import retrieve_candidates, select_reranked_per_page
 from backend.query.shortcuts import (
@@ -22,6 +23,7 @@ from backend.query.shortcuts import (
     check_greeting,
     check_vague_requirements,
     check_admission_numerical_shortcut,
+    check_phd_duration_shortcut,
 )
 from backend.retrieval.rerank import check_confidence, expand_context
 
@@ -108,6 +110,10 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     if vague:
         return make_response(vague, [])
 
+    phd_duration = check_phd_duration_shortcut(question)
+    if phd_duration:
+        return make_response(phd_duration["answer"], [SourceItem(**s) for s in phd_duration["sources"]])
+
     acronym = check_acronym_shortcut(question)
     if acronym:
         return make_response(acronym["answer"], [SourceItem(**s) for s in acronym["sources"]])
@@ -129,27 +135,55 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     index, chunks = _get_index_state(request)
 
     try:
-        candidates = retrieve_candidates(question, index, chunks)
-        reranked, reranked_raw = select_reranked_per_page(question, candidates)
-        expanded = expand_context(reranked, chunks)
-        is_confident = check_confidence(expanded, question)
+        search_queries = await rewrite_query(question, history)
+        
+        logger.info("--- OPTIMIZED SEARCH QUERIES ---")
+        for i, sq in enumerate(search_queries, 1):
+            logger.info(f"  {i}. {sq}")
+        logger.info("--------------------------------")
+
+        all_expanded = []
+        all_evidence = []
+        seen_texts = set()
+
+        for q in search_queries:
+            candidates = retrieve_candidates(q, index, chunks)
+            reranked, _ = select_reranked_per_page(q, candidates)
+            expanded = expand_context(reranked, chunks)
+
+            for chunk in expanded:
+                chunk_text = chunk.get("chunk", "")
+                if chunk_text not in seen_texts:
+                    seen_texts.add(chunk_text)
+                    all_expanded.append(chunk)
+
+            # Extract evidence strictly for this sub-query
+            top_expanded = sorted(expanded, key=lambda c: c.get("rerank_score", -999), reverse=True)[:3]
+            evidence_text = await extract_evidence(q, top_expanded)
+            if evidence_text and "NO_EVIDENCE" not in evidence_text.upper():
+                all_evidence.append(evidence_text)
+
+        all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
+        merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
+
+        is_confident = check_confidence(all_expanded, question)
 
         log_ask_request(
             question=question,
             latency_ms=timer.elapsed_ms,
-            candidate_count=len(candidates),
-            reranked_count=len(reranked),
-            expanded_count=len(expanded),
+            candidate_count=len(all_expanded),
+            reranked_count=len(all_expanded),
+            expanded_count=len(all_expanded),
             confidence_passed=is_confident,
             model_used=settings.ollama_model,
-            rerank_scores=[c.get("rerank_score", 0) for c in reranked],
+            rerank_scores=[c.get("rerank_score", 0) for c in all_expanded],
         )
 
         if not is_confident:
             return make_response(NOT_AVAILABLE, [])
 
         # Entity-presence validation to block hallucinations on out-of-domain queries
-        context_text = "\n".join(c["chunk"].lower() for c in expanded)
+        context_text = "\n".join(c["chunk"].lower() for c in all_expanded)
         q_lower = question.lower()
         
         # Block queries containing students enrollment count queries
@@ -167,7 +201,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                 return make_response(NOT_AVAILABLE, [])
 
         async with llm_semaphore:
-            result = await generate_answer(question, expanded, history)
+            result = await generate_from_evidence(question, merged_evidence, all_expanded, history)
         ans_text = result["answer"]
         ans_text_lower = ans_text.lower()
         
@@ -209,7 +243,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                 page=c["page"],
                 rerank_score=round(c.get("rerank_score", 0), 3),
             )
-            for c in expanded
+            for c in all_expanded
         ]
 
         return response

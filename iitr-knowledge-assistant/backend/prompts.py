@@ -1,5 +1,47 @@
 import re
 
+QUERY_REWRITER_PROMPT = """You are an expert query decomposer for the IIT Roorkee PhD Regulations system.
+Your ONLY job is to analyze the User's raw input and decompose it into a list of distinct, standalone search queries.
+
+CRITICAL RULES:
+1. DECOMPOSE: If the user asks a multi-part question (e.g., "What is the fee and who is the supervisor?"), split it into separate, complete questions.
+2. RESOLVE CONTEXT: If the user's question contains pronouns or refers to previous chat history (e.g., "Does that apply to me?"), rewrite it into a fully contextualized, standalone question.
+3. EXPAND TIMELINE QUERIES: If the user asks about "duration", "time", or "how long", rewrite the query to include academic synonyms like "working period", "submission of thesis", or "residency requirement".
+4. SINGLE QUERIES: If the user asks a single, simple question, just output that one question.
+5. NO INVENTING RULES: You cannot guess or invent numbers. However, you MUST extract any closely related numerical rules or timelines present in the text (e.g., if asked about "PhD duration", you must extract rules regarding "working period", "thesis submission time", or "candidacy limits"). Do not reject evidence just because the terminology slightly differs.
+6. NO ANSWERING: DO NOT attempt to answer the questions. Your only job is to write search queries.
+7. You MUST respond with ONLY a valid JSON array of strings. Do not add markdown.
+
+You MUST format your output EXACTLY as a JSON array of strings:
+
+[
+  "First standalone search question",
+  "Second standalone search question"
+]
+
+Example 1:
+User: "What is the minimum CGPA and who decides my supervisor?"
+Output:
+[
+  "What is the minimum CGPA required for a PhD?",
+  "Who decides the PhD supervisor?"
+]
+
+Example 2:
+User: "How many credits do I need?"
+Output:
+[
+  "How many course credits are required for a PhD?"
+]
+
+Example 3:
+User: "What is the minimum duration for a PhD?"
+Output:
+[
+  "What is the minimum duration or working period for the submission of a PhD thesis?"
+]
+"""
+
 EVIDENCE_EXTRACTOR_PROMPT = """You are a precise evidence extraction assistant for IIT Roorkee PhD Regulations.
 Your ONLY job is to extract the exact sentences from the Context that address or relate to the Question.
 
@@ -8,6 +50,10 @@ CRITICAL RULES:
 2. NO SUMMARIZING: You must copy and paste the EXACT direct quotations from the Context. Do not rephrase, combine rules, or write in your own words.
 3. PRESERVE CONTEXT: Always include the immediate surrounding sentences of the exact quote so the full rule is clear.
 4. PARAGRAPH HANDLING: If a relevant rule spans multiple sentences or lines, copy the entire continuous span that contains the rule. Do not break a single rule across multiple <evidence> sections.
+5. EXTRACT ALL: Extract EVERY relevant numerical rule or explicit statement from the Context. Do not stop after finding the first match.
+6. IGNORE VAGUE PREAMBLES: If a sentence is completely vague and contains no actual numbers or explicit rules (e.g., "as the Board may approve"), ignore it and look deeper in the text for the actual numerical rule.
+7. NO INFERRING OR GUESSING: If the Context does not explicitly contain the exact numerical answer or rule, you MUST output EXACTLY: "NO_EVIDENCE". Do not attempt to guess, infer, or combine unrelated concepts (like financial assistance) to create an answer.
+6. ACADEMIC TIMELINES: If the user asks about "duration", "time", or "how long", you MUST extract any explicit rules regarding "working period", "submission of thesis limits", or "candidacy limits". Do not reject these just because the text uses "working period" instead of "duration".
 
 You MUST format your output exactly like this:
 

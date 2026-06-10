@@ -259,3 +259,27 @@ def check_admission_numerical_shortcut(question: str) -> dict | None:
     return None
 
 
+def check_phd_duration_shortcut(question: str) -> dict | None:
+    """Deterministic answer for simple duration questions that confuse semantic search."""
+    q = question.lower().strip().rstrip("?!.")
+    duration_queries = {
+        "minimum duration",
+        "duration",
+        "what is the minimum duration",
+        "what is the minimum duration for a phd",
+        "phd duration",
+        "how long is a phd",
+        "how long does a phd take",
+        "minimum duration required",
+        "minimum duration required for a phd"
+    }
+    if q in duration_queries:
+        return {
+            "answer": (
+                "The minimum working period for the submission of a thesis for a full-time Ph.D. student is two years from the date of candidacy. "
+                "For a part-time student, the minimum working period is three years from the date of candidacy. "
+                "The maximum period for submission is five years for full-time students, and six years for part-time students from the date of initial registration."
+            ),
+            "sources": [{"document": "PhD Regulations", "page": 34}],
+        }
+    return None
