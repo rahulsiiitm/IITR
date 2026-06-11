@@ -121,13 +121,28 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         await db.commit()
         return AskResponse(answer=ans, sources=srcs, session_id=session_id)
 
-    greeting = check_greeting(question)
-    if greeting:
-        return await make_response(greeting["answer"], [SourceItem(**s) for s in greeting["sources"]])
 
     vague = check_vague_requirements(question)
     if vague:
         return await make_response(vague, [])
+
+    # === Pre-Flight Intent Routing ===
+    from backend.query.intent import get_intent_router
+    from backend.generation.llm import generate_conversational
+    
+    router_instance = get_intent_router()
+    intent = router_instance.classify(question)
+    
+    if intent == "out_of_domain":
+        return await make_response(
+            "This information is not available in the provided document. I can only answer questions related to IIT Roorkee PhD regulations.",
+            []
+        )
+    elif intent == "conversational":
+        async with llm_semaphore:
+            ans = await generate_conversational(question, history)
+        return await make_response(ans, [])
+    # =================================
 
     acronym = check_acronym_shortcut(question)
     if acronym:
@@ -353,9 +368,36 @@ async def ask_stream(
     async def _pipeline_then_stream():
         """Async generator that first runs the full pipeline, then streams the answer."""
         try:
+            # ── Intent Router (Conversational/Out of Domain) ─────────────────
+            from backend.query.intent import get_intent_router
+            from backend.generation.llm import generate_conversational
+            
+            router_instance = get_intent_router()
+            intent = router_instance.classify(question)
+            
+            if intent == "out_of_domain":
+                ans = "This information is not available in the provided document. I can only answer questions related to IIT Roorkee PhD regulations."
+                db.add_all([
+                    Message(session_id=session_id, role="user", content=question),
+                    Message(session_id=session_id, role="assistant", content=ans, sources=[]),
+                ])
+                await db.commit()
+                yield f"data: {json.dumps({'type': 'token', 'content': ans})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
+                return
+            elif intent == "conversational":
+                ans = await generate_conversational(question, [])
+                db.add_all([
+                    Message(session_id=session_id, role="user", content=question),
+                    Message(session_id=session_id, role="assistant", content=ans, sources=[]),
+                ])
+                await db.commit()
+                yield f"data: {json.dumps({'type': 'token', 'content': ans})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
+                return
+
             # ── Shortcuts (instant responses) ────────────────────────────────
             for check_fn in [
-                lambda q: check_greeting(q),
                 lambda q: check_acronym_shortcut(q),
                 lambda q: check_cgpa_gate_shortcut(q),
                 lambda q: check_admission_numerical_shortcut(q),

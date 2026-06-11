@@ -8,6 +8,7 @@ from fastapi.responses import FileResponse
 
 from backend.api.routes.ask import router as ask_router
 from backend.api.routes.voice import router as voice_router
+from backend.api.routes.admin import router as admin_router
 from backend.services.voice_service import init_voice_models
 from backend.config import PROJECT_ROOT, settings
 from backend.indexing.build_index import load_index
@@ -68,6 +69,7 @@ app.add_middleware(
 
 app.include_router(ask_router)
 app.include_router(voice_router)
+app.include_router(admin_router)
 
 
 @app.get("/health")
@@ -86,7 +88,7 @@ def health():
 
 # Serve chat UI on the same port (explicit routes — root StaticFiles breaks POST /ask)
 _frontend_dir = PROJECT_ROOT / "frontend"
-_FRONTEND_FILES = ("index.html", "script.js", "style.css", "api-config.js")
+_FRONTEND_FILES = ("index.html", "script.js", "style.css", "api-config.js", "admin.html", "admin.js", "admin.css")
 
 
 def _serve_frontend_file(name: str):

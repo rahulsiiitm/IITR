@@ -122,10 +122,12 @@ Question:
 
 
 def build_greeting_prompt(question: str) -> str:
-    """Build user-role message for greeting exchanges."""
     return f"""The user said: "{question}"
 
-Respond with a brief, warm greeting introducing yourself as Sutra, the IIT Roorkee PhD Regulations Assistant, and ask how you can help."""
+Respond naturally and conversationally to the user's input based on your personality. 
+- If they ask what you can do or what you are capable of, explicitly list out your capabilities (e.g., answering questions about PhD admissions, coursework, candidacy, thesis evaluation, etc.). Use bullet points if necessary.
+- If they simply say hello or greet you, greet them back warmly.
+- Keep your response friendly and helpful."""
 
 
 VERIFIER_PROMPT = """You are a strict grounding verifier.

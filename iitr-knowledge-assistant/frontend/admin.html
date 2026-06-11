@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sutra Admin Panel</title>
+    <link rel="stylesheet" href="/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fa-solid fa-shield-halved"></i> Sutra Admin</h2>
+                <p>System Management</p>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </div>
+                <div class="nav-item" data-view="sessions">
+                    <i class="fa-solid fa-message"></i> Sessions
+                </div>
+                <div class="nav-item" data-view="settings">
+                    <i class="fa-solid fa-gear"></i> Settings
+                </div>
+            </div>
+            
+            <!-- Contextual sidebar for Sessions -->
+            <div class="sessions-list" id="sessions-list" style="display: none;">
+                <div class="loading-spinner" id="sessions-loading"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="topbar">
+                <h1 id="current-view-title">Dashboard Overview</h1>
+            </header>
+            
+            <!-- Dashboard View -->
+            <div class="view-container active" id="view-dashboard">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <i class="fa-solid fa-users"></i>
+                        <div class="stat-info">
+                            <h3>Total Sessions</h3>
+                            <p id="stat-sessions">...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-messages"></i>
+                        <div class="stat-info">
+                            <h3>Total Messages</h3>
+                            <p id="stat-messages">...</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fa-solid fa-microchip"></i>
+                        <div class="stat-info">
+                            <h3>LLM Model</h3>
+                            <p id="stat-llm" style="font-size: 1rem; overflow:hidden; text-overflow: ellipsis;">...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions View -->
+            <div class="view-container" id="view-sessions">
+                <div class="messages-container" id="messages-container">
+                    <div class="empty-state" id="empty-state">
+                        <i class="fa-solid fa-database"></i>
+                        <p>Select a session from the sidebar to view its messages.</p>
+                    </div>
+                </div>
+                <div class="session-actions" id="session-actions" style="display: none;">
+                    <button class="btn btn-danger" id="btn-delete-session"><i class="fa-solid fa-trash"></i> Delete Session</button>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div class="view-container" id="view-settings">
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h2>System Configuration</h2>
+                        <div class="settings-list" id="settings-list">
+                            <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/api-config.js"></script>
+    <script src="/admin.js"></script>
+</body>
+</html>

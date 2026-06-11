@@ -184,3 +184,8 @@ async def stream_answer_from_evidence(
                 answer_started = True
                 yield buffer
                 buffer = ""
+
+async def generate_conversational(question: str, history: list[dict] = None) -> str:
+    """Generate a conversational response without RAG context."""
+    user_prompt = build_greeting_prompt(question)
+    return await _call_ollama(SYSTEM_PROMPT, user_prompt, history)
