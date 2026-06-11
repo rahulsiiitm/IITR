@@ -26,5 +26,5 @@ ENV CUDA_VISIBLE_DEVICES=""
 
 EXPOSE 45123
 
-# Start the uvicorn application
-CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "45123", "--workers", "1"]
+# Start the uvicorn application after initializing the database
+CMD ["sh", "-c", "python -m backend.init_db && python -m uvicorn backend.main:app --host 0.0.0.0 --port 45123 --workers 1"]
