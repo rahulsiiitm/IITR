@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import AsyncGenerator
 import httpx
 
 from backend.config import settings
@@ -35,6 +36,48 @@ async def _call_ollama(system: str, user: str, history: list[dict] = None) -> st
         # /api/chat returns {"message": {"role": "assistant", "content": "..."}}
         msg = data.get("message", {})
         return msg.get("content", data.get("response", "No response from model.")).strip()
+
+
+async def _stream_ollama(
+    system: str,
+    user: str,
+    history: list[dict] = None,
+) -> AsyncGenerator[str, None]:
+    """Stream tokens from Ollama /api/chat as an async generator of content strings."""
+    messages = [{"role": "system", "content": system}]
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": user})
+
+    async with httpx.AsyncClient(timeout=400.0) as client:
+        async with client.stream(
+            "POST",
+            settings.ollama_url,
+            json={
+                "model": settings.ollama_model,
+                "messages": messages,
+                "stream": True,
+                "options": {
+                    "temperature": 0.0,
+                    "repeat_penalty": 1.1,
+                    "num_predict": 1500,
+                },
+            },
+        ) as response:
+            response.raise_for_status()
+            async for line in response.aiter_lines():
+                if not line.strip():
+                    continue
+                import json as _json
+                try:
+                    chunk = _json.loads(line)
+                except Exception:
+                    continue
+                token = chunk.get("message", {}).get("content", "")
+                if token:
+                    yield token
+                if chunk.get("done"):
+                    break
 
 
 def _format_sources(context_chunks: list[dict]) -> list[dict]:
@@ -101,3 +144,43 @@ async def generate_from_evidence(question: str, evidence_text: str, context_chun
         "answer": answer,
         "sources": _format_sources(context_chunks),
     }
+
+
+async def stream_answer_from_evidence(
+    question: str,
+    evidence_text: str,
+    context_chunks: list[dict],
+    history: list[dict] = None,
+) -> AsyncGenerator[str, None]:
+    """Stream the final answer token-by-token.
+
+    Yields string tokens as they arrive from Ollama.  The verifier step is
+    intentionally omitted here — it requires the complete answer which defeats
+    streaming.  Strict evidence extraction upstream prevents hallucination.
+    """
+    if "NO_EVIDENCE" in evidence_text.upper() or not evidence_text.strip():
+        yield "The regulations do not explicitly state this."
+        return
+
+    user_prompt = build_user_prompt(question, evidence_text)
+    buffer = ""
+    answer_started = False
+
+    async for token in _stream_ollama(SYSTEM_PROMPT, user_prompt, history):
+        if answer_started:
+            # Already past the prefix — stream tokens directly
+            yield token
+        else:
+            buffer += token
+            if "Answer:" in buffer:
+                # Strip everything up to and including "Answer:" then flush remainder
+                remainder = buffer.split("Answer:", 1)[-1]
+                buffer = ""
+                answer_started = True
+                if remainder:
+                    yield remainder
+            elif len(buffer) > 50:
+                # No "Answer:" prefix found — flush the whole buffer and start streaming
+                answer_started = True
+                yield buffer
+                buffer = ""

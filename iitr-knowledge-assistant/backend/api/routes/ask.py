@@ -16,7 +16,8 @@ from backend.database import get_db
 from backend.models import Session, Message
 import json
 
-from backend.generation.llm import extract_evidence, generate_from_evidence
+from fastapi.responses import StreamingResponse
+from backend.generation.llm import extract_evidence, generate_from_evidence, stream_answer_from_evidence, _format_sources
 from backend.generation.rewriter import rewrite_query
 from backend.logging.analytics import RequestTimer, log_ask_request
 from backend.query.processor import retrieve_candidates, select_reranked_per_page
@@ -291,3 +292,186 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     except Exception as exc:
         logger.exception("Error processing question")
         raise HTTPException(status_code=500, detail="An internal error occurred while processing your question.")
+
+
+# ── Streaming endpoint (/ask/stream) ──────────────────────────────────────────
+# The retrieval + evidence pipeline runs synchronously first; only the final
+# answer generation streams token-by-token via Server-Sent Events.
+
+@router.post("/ask/stream")
+@limiter.limit("20/minute")
+async def ask_stream(
+    body: AskRequest,
+    request: Request,
+    api_key: str = Depends(get_api_key),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    question = body.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="No question provided")
+
+    session_id = body.session_id
+    if session_id:
+        db_session = await db.get(Session, session_id)
+        if not db_session:
+            db_session = Session(id=session_id)
+            db.add(db_session)
+            await db.commit()
+    else:
+        db_session = Session(id=str(uuid.uuid4()))
+        db.add(db_session)
+        await db.commit()
+        session_id = db_session.id
+
+    # Run the full retrieval + evidence pipeline before opening the stream
+    index, chunks = _get_index_state(request)
+
+    async def _pipeline_then_stream():
+        """Async generator that first runs the full pipeline, then streams the answer."""
+        try:
+            # ── Shortcuts (instant responses) ────────────────────────────────
+            for check_fn in [
+                lambda q: check_greeting(q),
+                lambda q: check_acronym_shortcut(q),
+                lambda q: check_cgpa_gate_shortcut(q),
+                lambda q: check_admission_numerical_shortcut(q),
+                lambda q: check_candidacy_cgpa_shortcut(q),
+            ]:
+                result = check_fn(question)
+                if result:
+                    ans = result["answer"] if isinstance(result, dict) else result
+                    srcs = result.get("sources", []) if isinstance(result, dict) else []
+                    # Save to DB
+                    db.add_all([
+                        Message(session_id=session_id, role="user", content=question),
+                        Message(session_id=session_id, role="assistant", content=ans, sources=srcs),
+                    ])
+                    await db.commit()
+                    yield f"data: {json.dumps({'type': 'token', 'content': ans})}\n\n"
+                    yield f"data: {json.dumps({'type': 'done', 'sources': srcs, 'session_id': session_id})}\n\n"
+                    return
+
+            vague = check_vague_requirements(question)
+            if vague:
+                db.add_all([
+                    Message(session_id=session_id, role="user", content=question),
+                    Message(session_id=session_id, role="assistant", content=vague, sources=[]),
+                ])
+                await db.commit()
+                yield f"data: {json.dumps({'type': 'token', 'content': vague})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
+                return
+
+            # ── Domain blocking ──────────────────────────────────────────────
+            q_lower = question.lower()
+            blocked = (
+                any(k in q_lower for k in ["how many students", "number of students"])
+                or ("director" in q_lower and any(w in q_lower for w in ["who is", "name"]))
+                or any(k in q_lower for k in ["nirf", "placement", "salary", "package",
+                                               "hostel", "fee", "dean", "ranking",
+                                               "enrolled", "enrollment", "mess",
+                                               "average cgpa", "average marks"])
+            )
+            if blocked:
+                db.add_all([
+                    Message(session_id=session_id, role="user", content=question),
+                    Message(session_id=session_id, role="assistant", content=NOT_AVAILABLE, sources=[]),
+                ])
+                await db.commit()
+                yield f"data: {json.dumps({'type': 'token', 'content': NOT_AVAILABLE})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
+                return
+
+            # ── Retrieval + evidence (blocking, before stream opens) ─────────
+            search_queries = await rewrite_query(question, [])
+
+            num_queries = len(search_queries)
+            evidence_top_k = 4 if num_queries == 1 else (3 if num_queries == 2 else 2)
+            EVIDENCE_CHAR_BUDGET = 6_000
+
+            all_expanded, all_evidence, seen_texts = [], [], set()
+
+            for q in search_queries:
+                candidates = retrieve_candidates(q, index, chunks)
+                reranked, _ = select_reranked_per_page(q, candidates)
+                expanded = expand_context(reranked, chunks)
+
+                for chunk in expanded:
+                    t = chunk.get("chunk", "")
+                    if t not in seen_texts:
+                        seen_texts.add(t)
+                        all_expanded.append(chunk)
+
+                ev_chunks = reranked[:evidence_top_k]
+                if sum(len(c.get("chunk", "")) for c in ev_chunks) > EVIDENCE_CHAR_BUDGET:
+                    trimmed, used = [], 0
+                    for c in ev_chunks:
+                        cl = len(c.get("chunk", ""))
+                        if used + cl > EVIDENCE_CHAR_BUDGET:
+                            break
+                        trimmed.append(c); used += cl
+                    ev_chunks = trimmed or ev_chunks[:1]
+
+                ev = await extract_evidence(q, ev_chunks)
+                if ev and "NO_EVIDENCE" not in ev.upper():
+                    all_evidence.append(ev)
+
+            all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
+            merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
+            sources = _format_sources(all_expanded)
+
+            is_confident = check_confidence(all_expanded, question)
+            if not is_confident:
+                db.add_all([
+                    Message(session_id=session_id, role="user", content=question),
+                    Message(session_id=session_id, role="assistant", content=NOT_AVAILABLE, sources=[]),
+                ])
+                await db.commit()
+                yield f"data: {json.dumps({'type': 'token', 'content': NOT_AVAILABLE})}\n\n"
+                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
+                return
+
+            # ── Stream the answer ────────────────────────────────────────────
+            full_answer = ""
+            async with llm_semaphore:
+                async for token in stream_answer_from_evidence(question, merged_evidence, all_expanded):
+                    full_answer += token
+                    yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
+
+            # Normalise N/A indicators that the model may emit in text
+            na_indicators = [
+                "information is not available", "not mentioned in the provided",
+                "not specified in the provided", "does not mention", "does not specify",
+                "does not provide", "not clear from", "cannot be determined",
+                "the regulations do not explicitly state this",
+            ]
+            if any(ind in full_answer.lower() for ind in na_indicators):
+                full_answer = NOT_AVAILABLE
+                sources = []
+
+            db.add_all([
+                Message(session_id=session_id, role="user", content=question),
+                Message(session_id=session_id, role="assistant", content=full_answer,
+                        sources=[s if isinstance(s, dict) else s.__dict__ for s in sources]),
+            ])
+            await db.commit()
+
+            sources_payload = [
+                s if isinstance(s, dict) else {"document": s.document, "page": s.page}
+                for s in sources
+            ]
+            yield f"data: {json.dumps({'type': 'done', 'sources': sources_payload, 'session_id': session_id})}\n\n"
+
+        except Exception:
+            logger.exception("Error in streaming pipeline")
+            yield f"data: {json.dumps({'type': 'error', 'content': 'An internal error occurred.'})}\n\n"
+
+    return StreamingResponse(
+        _pipeline_then_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # disable nginx buffering if behind a proxy
+        },
+    )
+

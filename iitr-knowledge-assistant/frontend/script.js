@@ -63,23 +63,7 @@ function handleMessage(text) {
   sendBtn.disabled = true;
   const loader = addLoader();
 
-  sendToBackend(text)
-    .then((res) => {
-      loader.remove();
-      addMsg(res.answer, 'bot', res.sources, res.debug);
-    })
-    .catch((err) => {
-      console.error(err);
-      loader.remove();
-      addMsg(
-        err.message || 'Unable to reach the knowledge assistant. Please try again.',
-        'bot'
-      );
-    })
-    .finally(() => {
-      isProcessing = false;
-      sendBtn.disabled = false;
-    });
+  streamFromBackend(text, loader);
 }
 
 // ── Add message ───────────────────────────────────────
@@ -227,11 +211,164 @@ function escapeHtml(unsafe) {
     .replace(/'/g, '&#039;');
 }
 
-// ── API ───────────────────────────────────────────────
+// ── API (streaming) ───────────────────────────────────
 const API_BASE = window.API_SAME_ORIGIN
   ? window.location.origin
   : `http://${window.location.hostname}:${window.API_PORT || 52000}`;
 
+async function streamFromBackend(question, loaderEl) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (window.API_KEY) headers['X-API-Key'] = window.API_KEY;
+
+  const payload = { question };
+  if (currentSessionId) payload.session_id = currentSessionId;
+
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/ask/stream`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    loaderEl.remove();
+    addMsg(`Cannot reach the API at ${API_BASE}. Make sure the server is running.`, 'bot');
+    isProcessing = false;
+    sendBtn.disabled = false;
+    return;
+  }
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    loaderEl.remove();
+    addMsg(err.detail || 'Backend request failed.', 'bot');
+    isProcessing = false;
+    sendBtn.disabled = false;
+    return;
+  }
+
+  // Keep the loader visible while the pipeline runs on the backend.
+  // The bot bubble is created lazily on the first token, then the loader is removed.
+  let botBubble = null;
+  let accumulated = '';
+  let sourcesData = [];
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  function _ensureBubble() {
+    if (botBubble) return;
+    loaderEl.remove();
+    const { bubble } = addStreamingMsg();
+    botBubble = bubble;
+  }
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop(); // keep incomplete line
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        let event;
+        try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+        if (event.type === 'token') {
+          _ensureBubble();
+          accumulated += event.content;
+          // Live-render markdown as tokens arrive
+          if (typeof marked !== 'undefined') {
+            marked.setOptions({ breaks: true, gfm: true });
+            botBubble.innerHTML = marked.parse(accumulated);
+          } else {
+            botBubble.textContent = accumulated;
+          }
+          chatArea.scrollTop = chatArea.scrollHeight;
+
+        } else if (event.type === 'done') {
+          _ensureBubble(); // handles instant shortcuts that skip token events
+          if (event.session_id) currentSessionId = event.session_id;
+          sourcesData = event.sources || [];
+          // Final markdown render
+          if (typeof marked !== 'undefined') {
+            marked.setOptions({ breaks: true, gfm: true });
+            botBubble.innerHTML = marked.parse(accumulated);
+          }
+          // Append sources
+          if (sourcesData.length) {
+            const sourceContainer = document.createElement('div');
+            sourceContainer.className = 'source-container';
+            const grouped = {};
+            sourcesData.forEach((s) => {
+              const doc = s.document || 'Document';
+              if (!grouped[doc]) grouped[doc] = [];
+              grouped[doc].push(s.page);
+            });
+            for (const [docName, pages] of Object.entries(grouped)) {
+              const pill = document.createElement('span');
+              pill.className = 'source-pill';
+              const unique = [...new Set(pages)].sort((a, b) => a - b);
+              const label = unique.length === 1 ? 'p.' : 'pp.';
+              pill.textContent = `${docName} — ${label} ${unique.join(', ')}`;
+              sourceContainer.appendChild(pill);
+            }
+            botBubble.appendChild(sourceContainer);
+          }
+          chatArea.scrollTop = chatArea.scrollHeight;
+
+        } else if (event.type === 'error') {
+          _ensureBubble();
+          botBubble.textContent = event.content || 'An error occurred.';
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Stream read error:', err);
+    _ensureBubble();
+    if (!accumulated) botBubble.textContent = 'Connection interrupted. Please try again.';
+  } finally {
+    isProcessing = false;
+    sendBtn.disabled = false;
+  }
+}
+
+
+// ── Streaming bubble ──────────────────────────────────
+function addStreamingMsg() {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'msg-wrapper bot';
+
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>`;
+
+  const author = document.createElement('span');
+  author.className = 'msg-author';
+  author.textContent = 'Sutra';
+
+  meta.appendChild(avatar);
+  meta.appendChild(author);
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  wrapper.appendChild(meta);
+  wrapper.appendChild(bubble);
+  chatArea.appendChild(wrapper);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  return { wrapper, bubble };
+}
+
+// ── Legacy non-streaming API (kept for fallback) ───────
 async function sendToBackend(question) {
   const headers = { 'Content-Type': 'application/json' };
   if (window.API_KEY) headers['X-API-Key'] = window.API_KEY;
