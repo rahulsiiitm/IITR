@@ -502,10 +502,22 @@ async def ask_stream(
             ])
             await db.commit()
 
-            sources_payload = [
-                s if isinstance(s, dict) else {"document": s.document, "page": s.page}
-                for s in sources
-            ]
+            import os
+            from backend.config import PROJECT_ROOT
+            raw_dir = PROJECT_ROOT / "data" / "raw"
+            title_to_file = {}
+            if raw_dir.is_dir():
+                for f in os.listdir(raw_dir):
+                    if f.endswith(".pdf"):
+                        t = f.replace(".pdf", "").replace("_", " ").title()
+                        title_to_file[t] = f
+
+            sources_payload = []
+            for s in sources:
+                s_dict = s if isinstance(s, dict) else {"document": s.document, "page": s.page}
+                s_dict["filename"] = title_to_file.get(s_dict["document"])
+                sources_payload.append(s_dict)
+
             yield f"data: {json.dumps({'type': 'done', 'sources': sources_payload, 'session_id': session_id})}\n\n"
 
         except Exception:

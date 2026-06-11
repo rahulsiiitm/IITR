@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from backend.api.routes.ask import router as ask_router
+from backend.api.routes.voice import router as voice_router
+from backend.services.voice_service import init_voice_models
 from backend.config import PROJECT_ROOT, settings
 from backend.indexing.build_index import load_index
 from backend.logging.analytics import setup_logging
@@ -31,6 +33,9 @@ async def lifespan(app: FastAPI):
         from backend.retrieval.bm25 import get_bm25_index
         get_bm25_index(chunks)
         logger.info("BM25 index initialized successfully")
+
+        # Pre-initialize voice models
+        init_voice_models()
     except FileNotFoundError as exc:
         app.state.faiss_index = None
         app.state.chunks = None
@@ -62,6 +67,7 @@ app.add_middleware(
 )
 
 app.include_router(ask_router)
+app.include_router(voice_router)
 
 
 @app.get("/health")
@@ -116,3 +122,17 @@ if _frontend_dir.is_dir():
         from fastapi.responses import RedirectResponse
 
         return RedirectResponse(url="/", status_code=302)
+
+from fastapi.staticfiles import StaticFiles
+raw_data_dir = PROJECT_ROOT / "data" / "raw"
+if raw_data_dir.is_dir():
+    app.mount("/docs", StaticFiles(directory=str(raw_data_dir)), name="docs")
+
+assets_dir = PROJECT_ROOT / "assets"
+if assets_dir.is_dir():
+    app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+@app.get("/favicon.ico")
+def favicon():
+    from fastapi.responses import FileResponse
+    return FileResponse(assets_dir / "favicon.ico")

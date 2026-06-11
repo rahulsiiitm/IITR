@@ -97,7 +97,7 @@ def main() -> None:
     )
 
     port = None
-    deadline = time.time() + 60
+    deadline = time.time() + 180
     while time.time() < deadline:
         if proc.poll() is not None:
             print("Server exited before binding. Check errors above.", file=sys.stderr)
