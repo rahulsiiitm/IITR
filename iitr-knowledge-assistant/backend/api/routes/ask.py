@@ -159,6 +159,21 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         all_evidence = []
         seen_texts = set()
 
+        # Dynamic evidence window: give each sub-query more chunks when there
+        # are fewer sub-queries so multi-section answers aren't truncated.
+        # With many sub-queries, keep it tight to avoid overflowing the extractor.
+        num_queries = len(search_queries)
+        if num_queries == 1:
+            evidence_top_k = 4   # single focused question → rich context
+        elif num_queries == 2:
+            evidence_top_k = 3   # two-parter → moderate context each
+        else:
+            evidence_top_k = 2   # many sub-queries → stay lean per query
+
+        # Hard character budget: never send more than ~6000 chars to the
+        # extractor regardless of chunk count (keeps latency predictable).
+        EVIDENCE_CHAR_BUDGET = 6_000
+
         for q in search_queries:
             candidates = retrieve_candidates(q, index, chunks)
             reranked, _ = select_reranked_per_page(q, candidates)
@@ -170,9 +185,21 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                     seen_texts.add(chunk_text)
                     all_expanded.append(chunk)
 
-            # Extract evidence strictly for this sub-query
-            # Pass only the top 2 candidate chunks directly from reranked to avoid confusing the Extractor with preambles
-            evidence_text = await extract_evidence(q, reranked[:2])
+            # Select top-k chunks for this sub-query and apply char budget
+            evidence_chunks = reranked[:evidence_top_k]
+            total_chars = sum(len(c.get("chunk", "")) for c in evidence_chunks)
+            if total_chars > EVIDENCE_CHAR_BUDGET:
+                # Trim the last chunks until we're within budget
+                trimmed, budget_used = [], 0
+                for c in evidence_chunks:
+                    c_len = len(c.get("chunk", ""))
+                    if budget_used + c_len > EVIDENCE_CHAR_BUDGET:
+                        break
+                    trimmed.append(c)
+                    budget_used += c_len
+                evidence_chunks = trimmed or evidence_chunks[:1]  # always keep at least 1
+
+            evidence_text = await extract_evidence(q, evidence_chunks)
             if evidence_text and "NO_EVIDENCE" not in evidence_text.upper():
                 all_evidence.append(evidence_text)
 
