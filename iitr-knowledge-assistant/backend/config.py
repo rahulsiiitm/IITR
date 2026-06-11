@@ -8,19 +8,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-class DocumentConfig:
-    """Static registry for indexed documents (single-PDF phase)."""
-
-    filename: str = "phd_regulations_2026.pdf"
-    title: str = "PhD Regulations"
-    category: str = "academic"
-    year: int = 2026
-
-
-DOCUMENT_REGISTRY: dict[str, DocumentConfig] = {
-    "phd_regulations_2026": DocumentConfig(),
-}
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -29,7 +16,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    pdf_path: Path = Field(default=PROJECT_ROOT / "data" / "raw" / "phd_regulations_2026.pdf")
+    data_dir: Path = Field(default=PROJECT_ROOT / "data" / "raw")
     vector_db_dir: Path = Field(default=PROJECT_ROOT / "vector_db")
 
     embedding_model: str = "BAAI/bge-base-en-v1.5"
@@ -73,5 +60,3 @@ class Settings(BaseSettings):
 settings = Settings()
 
 
-def get_document_config(document_key: str = "phd_regulations_2026") -> DocumentConfig:
-    return DOCUMENT_REGISTRY[document_key]

@@ -15,24 +15,32 @@ def _get_encoder() -> SentenceTransformer:
     return SentenceTransformer(settings.embedding_model, device="cpu")
 
 
-def ingest_document(pdf_path: Path | None = None) -> list[dict]:
+def ingest_document(pdf_path: Path, start_id: int = 1) -> list[dict]:
     """Extract, chunk, and enrich a PDF into indexed chunks."""
-    path = pdf_path or settings.pdf_path
-    if not path.exists():
-        raise FileNotFoundError(f"PDF not found: {path}")
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"PDF not found: {pdf_path}")
 
-    pages = extract_pages(str(path))
+    pages = extract_pages(str(pdf_path))
     raw_chunks = chunk_pages(pages)
-    return attach_metadata(raw_chunks)
+    return attach_metadata(raw_chunks, filename=pdf_path.name, start_id=start_id)
 
 
-def build_and_save_index(
-    chunks: list[dict] | None = None,
-    pdf_path: Path | None = None,
-) -> tuple[faiss.IndexFlatL2, list[dict]]:
-    """Build FAISS index from chunks and persist to disk."""
-    if chunks is None:
-        chunks = ingest_document(pdf_path)
+def build_and_save_index() -> tuple[faiss.IndexFlatIP, list[dict]]:
+    """Build FAISS index from all PDFs in data_dir and persist to disk."""
+    chunks = []
+    start_id = 1
+    
+    if not settings.data_dir.exists():
+        raise FileNotFoundError(f"Data dir not found: {settings.data_dir}")
+        
+    for pdf_path in settings.data_dir.glob("*.pdf"):
+        print(f"Processing: {pdf_path.name}")
+        doc_chunks = ingest_document(pdf_path, start_id)
+        chunks.extend(doc_chunks)
+        start_id += len(doc_chunks)
+        
+    if not chunks:
+        raise ValueError(f"No PDFs found in {settings.data_dir}")
 
     encoder = _get_encoder()
     texts = [c["text"] for c in chunks]

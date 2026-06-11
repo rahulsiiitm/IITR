@@ -66,6 +66,7 @@ class BM25Okapi:
                     "chunk": chunk["text"],
                     "page": chunk["page"],
                     "document": chunk["document"],
+                    "doc_type": chunk.get("doc_type", "sop"),
                     "full_page": chunk.get("full_page", chunk["text"]),
                     "index": chunk.get("index", idx),
                     "bm25_score": score,

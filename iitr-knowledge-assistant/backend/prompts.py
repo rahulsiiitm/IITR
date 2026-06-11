@@ -81,8 +81,11 @@ CRITICAL CONSTRAINTS:
 1. STRICT GROUNDING: Use only the provided Evidence.
 2. PRESERVE RESTRICTIONS: If the answer contains restrictions ("jointly", "only", "must", "shall", "at most", "maximum", "minimum"), preserve them exactly.
 3. LOGICAL DEDUCTION IS ALLOWED: You must perform basic math and logical deductions (e.g., if a rule says "maximum 8 months", answering "No, the maximum is 8 months" to a question about "10 months" is correct).
-4. If the Evidence is completely silent on the topic, return EXACTLY: "The regulations do not explicitly state this." Do not attempt to guess.
-5. COMPREHENSIVE TIMELINES: If the user asks about duration or timelines, and the Evidence provides both candidacy limits (e.g., 18 months) and thesis limits (e.g., 2 years), explain both clearly to avoid confusion.
+4. MULTI-DOCUMENT CONFLICT RESOLUTION: You will receive evidence from both "PhD Regulations" (the official rulebook) and "SOPs" (Standard Operating Procedures). 
+   - PhD Regulations are the supreme authority. If an SOP contradicts a Regulation, the Regulation wins.
+   - Use SOPs to provide detailed procedural steps, forms, or workflows.
+5. If the Evidence is completely silent on the topic, return EXACTLY: "The regulations do not explicitly state this." Do not attempt to guess.
+6. COMPREHENSIVE TIMELINES: If the user asks about duration or timelines, and the Evidence provides both candidacy limits (e.g., 18 months) and thesis limits (e.g., 2 years), explain both clearly to avoid confusion.
 
 ELIGIBILITY EVALUATION PROCEDURE:
 ONLY when the user query asks if a specific candidate qualifies or is eligible, you MUST follow this exact format:

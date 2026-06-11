@@ -27,12 +27,12 @@ def reciprocal_rank_fusion(
     chunk_lookup = {}
 
     for rank, item in enumerate(dense_results, start=1):
-        key = (item["page"], item["index"])
+        key = item["chunk_id"]
         chunk_lookup[key] = item
         rrf_scores[key] = rrf_scores.get(key, 0.0) + (1.0 / (k + rank))
 
     for rank, item in enumerate(sparse_results, start=1):
-        key = (item["page"], item["index"])
+        key = item["chunk_id"]
         if key not in chunk_lookup:
             chunk_lookup[key] = item
         else:
@@ -78,6 +78,7 @@ def search(
                     "chunk": chunk["text"],
                     "page": chunk["page"],
                     "document": chunk["document"],
+                    "doc_type": chunk.get("doc_type", "sop"),
                     "full_page": chunk.get("full_page", chunk["text"]),
                     "l2_score": float(distances[0][i]),
                     "index": chunk.get("index", idx),

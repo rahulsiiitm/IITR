@@ -1,7 +1,8 @@
 import logging
-from typing import Any
+from typing import Any, AsyncGenerator
 
 import asyncio
+import re
 import uuid
 from fastapi import APIRouter, HTTPException, Request, Security, Depends
 from fastapi.security import APIKeyHeader
@@ -206,6 +207,29 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
         all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
         merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
+        
+        # Precisely identify which chunks were actually quoted in the extracted evidence
+        used_chunks = []
+        if merged_evidence != "NO_EVIDENCE":
+            ev_clean = re.sub(r'\s+', '', merged_evidence.lower())
+            for c in all_expanded:
+                chunk_clean = re.sub(r'\s+', '', c.get("chunk", "").lower())
+                is_used = False
+                if len(chunk_clean) < 40:
+                    if chunk_clean in ev_clean: is_used = True
+                else:
+                    for i in range(0, len(chunk_clean) - 40, 20):
+                        if chunk_clean[i:i+40] in ev_clean:
+                            is_used = True
+                            break
+                if is_used:
+                    used_chunks.append(c)
+        
+        # Fallback to the top candidate if sliding window misses (e.g. LLM rephrased)
+        if not used_chunks and all_expanded and merged_evidence != "NO_EVIDENCE":
+            used_chunks = [all_expanded[0]]
+            
+        sources = _format_sources(used_chunks)
 
         is_confident = check_confidence(all_expanded, question)
 
@@ -274,7 +298,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         else:
             response = await make_response(
                 ans_text,
-                [SourceItem(**s) for s in result["sources"]],
+                [SourceItem(**s) for s in sources],
             )
 
         # Always include debug info with full chunks so the user can see exactly what was retrieved
@@ -418,7 +442,29 @@ async def ask_stream(
 
             all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
             merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
-            sources = _format_sources(all_expanded)
+            
+            # Precisely identify which chunks were actually quoted in the extracted evidence
+            used_chunks = []
+            if merged_evidence != "NO_EVIDENCE":
+                ev_clean = re.sub(r'\s+', '', merged_evidence.lower())
+                for c in all_expanded:
+                    chunk_clean = re.sub(r'\s+', '', c.get("chunk", "").lower())
+                    is_used = False
+                    if len(chunk_clean) < 40:
+                        if chunk_clean in ev_clean: is_used = True
+                    else:
+                        for i in range(0, len(chunk_clean) - 40, 20):
+                            if chunk_clean[i:i+40] in ev_clean:
+                                is_used = True
+                                break
+                    if is_used:
+                        used_chunks.append(c)
+            
+            # Fallback to the top candidate if sliding window misses (e.g. LLM rephrased)
+            if not used_chunks and all_expanded and merged_evidence != "NO_EVIDENCE":
+                used_chunks = [all_expanded[0]]
+                
+            sources = _format_sources(used_chunks)
 
             is_confident = check_confidence(all_expanded, question)
             if not is_confident:

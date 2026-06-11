@@ -84,6 +84,36 @@ def rerank(
             "professional experience" in chunk_lower or re.search(r"\bepe\b", chunk_lower)
         ):
             score -= 10.0
+            
+        # Unified Search Priority Boost: Give PhD Regulations a slight edge over SOPs (tie-breaker only)
+        if candidate.get("doc_type") == "regulation":
+            score += 0.02
+            
+        # SOP Keyword Boost: Ensure extremely specific SOP queries retrieve the exact target SOP
+        SOP_BOOSTS = {
+            "externally funded": 2.0,
+            "efrs": 2.0,
+            "mou category": 2.0,
+            "reinstatement": 2.0,
+            "jrf-srf": 2.0,
+            "jrf to srf": 2.0,
+            "domestic conference": 2.0,
+            "seminar code": 2.0,
+            "2-credit seminar": 2.0,
+            "2 credit seminar": 2.0,
+            "hindi abstract": 2.0,
+            "abstract in hindi": 2.0,
+            "excellence in doctoral": 2.0,
+            "doctoral research award": 2.0,
+            "institutional visit": 2.0,
+            "thesis submission fee": 2.0,
+        }
+        
+        q_lower = query.lower()
+        for kw, boost in SOP_BOOSTS.items():
+            if kw in q_lower and kw in chunk_lower:
+                score += boost
+            
         candidate["rerank_score"] = score
 
     ranked = sorted(candidates, key=lambda x: x["rerank_score"], reverse=True)
