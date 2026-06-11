@@ -64,7 +64,7 @@ def expand_query_intent(query: str) -> str:
 
 def search_with_expansion(
     query: str,
-    index,
+    index,  # faiss.IndexFlatIP (cosine via inner product on normalized vecs)
     chunks: list[dict],
     top_k: int,
 ) -> list[dict]:
@@ -91,7 +91,7 @@ def search_with_expansion(
 
 def retrieve_candidates(
     question: str,
-    index,
+    index,  # faiss.IndexFlatIP (cosine via inner product on normalized vecs)
     chunks: list[dict],
 ) -> list[dict]:
     """Retrieve candidate chunks for a question (handles compound questions)."""

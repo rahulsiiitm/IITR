@@ -52,7 +52,7 @@ def reciprocal_rank_fusion(
 
 def search(
     query: str,
-    index: faiss.IndexFlatL2,
+    index: faiss.IndexFlatIP,
     chunks: list[dict],
     top_k: int | None = None,
 ) -> list[dict]:
@@ -64,6 +64,8 @@ def search(
     prefixed_query = query if query.startswith(BGE_QUERY_PREFIX) else f"{BGE_QUERY_PREFIX}{query}"
     encoder = get_encoder()
     query_embedding = encoder.encode([prefixed_query]).astype("float32")
+    # Normalize to unit vector — required for cosine similarity via IndexFlatIP
+    faiss.normalize_L2(query_embedding)
     distances, indices = index.search(query_embedding, k_fetch)
 
     dense_results = []

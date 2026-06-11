@@ -40,7 +40,13 @@ def build_and_save_index(
     embeddings = np.array(embeddings).astype("float32")
 
     dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
+
+    # Normalize to unit vectors so that inner product == cosine similarity.
+    # BGE models are trained with cosine similarity; L2 on raw vectors gives
+    # suboptimal ranking.  faiss.normalize_L2 operates in-place.
+    faiss.normalize_L2(embeddings)
+
+    index = faiss.IndexFlatIP(dimension)  # Inner Product = Cosine on unit vectors
     index.add(embeddings)
 
     settings.faiss_index_path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,7 +59,7 @@ def build_and_save_index(
     return index, chunks
 
 
-def load_index() -> tuple[faiss.IndexFlatL2, list[dict]]:
+def load_index() -> tuple[faiss.IndexFlatIP, list[dict]]:
     """Load persisted FAISS index and chunk metadata."""
     if not settings.faiss_index_path.exists():
         raise FileNotFoundError(
