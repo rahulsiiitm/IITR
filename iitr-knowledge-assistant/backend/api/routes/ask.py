@@ -1,5 +1,5 @@
 import logging
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import asyncio
 import re
@@ -26,7 +26,6 @@ from backend.query.shortcuts import (
     check_acronym_shortcut,
     check_candidacy_cgpa_shortcut,
     check_cgpa_gate_shortcut,
-    check_greeting,
     check_vague_requirements,
     check_admission_numerical_shortcut,
 )
@@ -328,7 +327,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
         return response
 
-    except Exception as exc:
+    except Exception:
         logger.exception("Error processing question")
         raise HTTPException(status_code=500, detail="An internal error occurred while processing your question.")
 

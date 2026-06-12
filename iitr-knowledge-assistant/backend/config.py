@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,13 +20,13 @@ class Settings(BaseSettings):
 
     embedding_model: str = "BAAI/bge-base-en-v1.5"
     rerank_model: str = "BAAI/bge-reranker-base"
-    ollama_model: str = "qwen2.5:7b-instruct-q4_K_M"
+    ollama_model: str = "llama3.2"
     ollama_url: str = "http://localhost:11434/api/chat"
 
     top_k: int = 15
-    subquestion_top_k: int = 10
-    rerank_top_k: int = 5
-    rerank_top_k_multi: int = 5
+    subquestion_top_k: int = 6
+    rerank_top_k: int = 6
+    rerank_top_k_multi: int = 8
     chunk_size: int = 2000
     chunk_overlap: int = 250
     confidence_threshold: float = -5.0

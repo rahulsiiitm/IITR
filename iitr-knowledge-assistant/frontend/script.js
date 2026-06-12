@@ -33,7 +33,7 @@ function unlockAudio() {
   // Play a silent clip synchronously during the user-gesture event so Chrome
   // grants this tab permission to call audio.play() from async code later
   const silent = new Audio(SILENT_WAV);
-  silent.play().catch(() => {});
+  silent.play().catch(() => { });
 }
 
 // ── Toggle ────────────────────────────────────────────
@@ -390,7 +390,7 @@ async function streamFromBackend(question, loaderEl) {
             }
             botBubble.appendChild(sourceContainer);
           }
-          
+
           const wrapper = botBubble.closest(".msg-wrapper");
           setupBotSpeakControl(wrapper, accumulated);
           if (voiceModeState === "thinking" || voiceModeState === "speaking") {
@@ -402,7 +402,7 @@ async function streamFromBackend(question, loaderEl) {
           } else if (autoReadAloud) {
             speakMessage(wrapper);
           }
-          
+
           chatArea.scrollTop = chatArea.scrollHeight;
         } else if (event.type === "error") {
           _ensureBubble();
@@ -534,10 +534,10 @@ let activeSpeakerWrapper = null;
 
 function setupBotSpeakControl(wrapper, text) {
   wrapper.dataset.rawText = text;
-  
+
   const meta = wrapper.querySelector(".msg-meta");
   if (!meta || meta.querySelector(".speak-btn")) return;
-  
+
   const speakBtn = document.createElement("button");
   speakBtn.className = "speak-btn";
   speakBtn.title = "Read aloud";
@@ -548,7 +548,7 @@ function setupBotSpeakControl(wrapper, text) {
       <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
     </svg>
   `;
-  
+
   const soundwave = document.createElement("div");
   soundwave.className = "soundwave hidden";
   soundwave.innerHTML = `
@@ -557,10 +557,10 @@ function setupBotSpeakControl(wrapper, text) {
     <div class="soundwave-bar"></div>
     <div class="soundwave-bar"></div>
   `;
-  
+
   meta.appendChild(speakBtn);
   meta.appendChild(soundwave);
-  
+
   speakBtn.addEventListener("click", () => {
     unlockAudio();
     speakMessage(wrapper);
@@ -574,7 +574,7 @@ function stopSpeaking() {
     activeAudio = null;
     el.onended = null;
     el.onerror = null;
-    Promise.resolve().then(() => { try { el.pause(); el.src = ""; } catch(_) {} });
+    Promise.resolve().then(() => { try { el.pause(); el.src = ""; } catch (_) { } });
   }
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
@@ -604,19 +604,19 @@ function speakMessage(wrapper) {
     stopSpeaking();
     return;
   }
-  
+
   stopSpeaking();
-  
+
   const textToRead = wrapper.dataset.rawText;
   if (!textToRead) return;
-  
+
   const cleanText = stripMarkdown(textToRead);
   if (!cleanText) return;
-  
+
   activeSpeakerWrapper = wrapper;
   const speakBtn = wrapper.querySelector(".speak-btn");
   const soundwave = wrapper.querySelector(".soundwave");
-  
+
   if (speakBtn) {
     speakBtn.classList.add("playing");
     speakBtn.title = "Stop reading";
@@ -629,7 +629,7 @@ function speakMessage(wrapper) {
   if (soundwave) {
     soundwave.classList.remove("hidden");
   }
-  
+
   // Increment generation to invalidate any currently pending TTS fetches
   speakGeneration++;
   const myGeneration = speakGeneration;
@@ -643,50 +643,50 @@ function speakMessage(wrapper) {
       headers: fetchHeaders,
       body: JSON.stringify({ text: cleanText })
     })
-    .then(res => {
-      if (!res.ok) throw new Error("TTS synthesis failed");
-      return res.blob();
-    })
-    .then(audioBlob => new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(audioBlob);
-    }))
-    .then(dataUrl => {
-      // Abort if another speak request started while we were awaiting
-      if (myGeneration !== speakGeneration) return;
+      .then(res => {
+        if (!res.ok) throw new Error("TTS synthesis failed");
+        return res.blob();
+      })
+      .then(audioBlob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(audioBlob);
+      }))
+      .then(dataUrl => {
+        // Abort if another speak request started while we were awaiting
+        if (myGeneration !== speakGeneration) return;
 
-      activeAudio = new Audio(dataUrl);
+        activeAudio = new Audio(dataUrl);
 
-      activeAudio.onended = () => {
-        activeAudio = null;
-        if (activeSpeakerWrapper === wrapper && myGeneration === speakGeneration) {
-          stopSpeaking();
-        }
-      };
+        activeAudio.onended = () => {
+          activeAudio = null;
+          if (activeSpeakerWrapper === wrapper && myGeneration === speakGeneration) {
+            stopSpeaking();
+          }
+        };
 
-      activeAudio.onerror = () => {
-        activeAudio = null;
-        if (activeSpeakerWrapper === wrapper && myGeneration === speakGeneration) {
-          stopSpeaking();
-        }
-      };
+        activeAudio.onerror = () => {
+          activeAudio = null;
+          if (activeSpeakerWrapper === wrapper && myGeneration === speakGeneration) {
+            stopSpeaking();
+          }
+        };
 
-      activeAudio.play().catch(err => {
-        console.warn("Read-aloud play failed, falling back:", err.message);
-        activeAudio = null;
+        activeAudio.play().catch(err => {
+          console.warn("Read-aloud play failed, falling back:", err.message);
+          activeAudio = null;
+          if (myGeneration === speakGeneration) {
+            fallbackToBrowserSpeechOnWrapper(wrapper, cleanText);
+          }
+        });
+      })
+      .catch(err => {
+        console.warn("TTS fetch failed, falling back:", err.message);
         if (myGeneration === speakGeneration) {
           fallbackToBrowserSpeechOnWrapper(wrapper, cleanText);
         }
       });
-    })
-    .catch(err => {
-      console.warn("TTS fetch failed, falling back:", err.message);
-      if (myGeneration === speakGeneration) {
-        fallbackToBrowserSpeechOnWrapper(wrapper, cleanText);
-      }
-    });
   } catch (err) {
     console.warn("TTS error, falling back:", err.message);
     if (myGeneration === speakGeneration) {
@@ -700,31 +700,31 @@ function fallbackToBrowserSpeechOnWrapper(wrapper, cleanText) {
     stopSpeaking();
     return;
   }
-  
+
   const utterance = new SpeechSynthesisUtterance(cleanText);
   const voices = window.speechSynthesis.getVoices();
-  const preferredVoice = voices.find(v => 
-    v.lang.startsWith("en-") && 
+  const preferredVoice = voices.find(v =>
+    v.lang.startsWith("en-") &&
     (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Microsoft"))
   ) || voices.find(v => v.lang.startsWith("en"));
-  
+
   if (preferredVoice) {
     utterance.voice = preferredVoice;
   }
-  
+
   utterance.onend = () => {
     if (activeSpeakerWrapper === wrapper) {
       stopSpeaking();
     }
   };
-  
+
   utterance.onerror = (e) => {
     console.error("Speech synthesis error:", e);
     if (activeSpeakerWrapper === wrapper) {
       stopSpeaking();
     }
   };
-  
+
   window.speechSynthesis.speak(utterance);
 }
 
@@ -760,10 +760,10 @@ let speakGeneration = 0;  // incremented each time we start speaking; guards sta
 
 // Silent WAV (smallest valid file) used to unlock browser autoplay on first user click
 // VAD tuning — raise threshold if room noise triggers false silence detections
-const SILENCE_THRESHOLD    = 22;    // avg FFT amplitude below which we count as silence
-const SILENCE_START_DELAY  = 2000;  // ms after recording starts before silence countdown begins
-const SILENCE_DURATION     = 2000;  // ms of continuous silence that triggers submission
-const MAX_RECORDING_MS     = 30000; // hard cap — stop even if VAD never fires
+const SILENCE_THRESHOLD = 22;    // avg FFT amplitude below which we count as silence
+const SILENCE_START_DELAY = 2000;  // ms after recording starts before silence countdown begins
+const SILENCE_DURATION = 2000;  // ms of continuous silence that triggers submission
+const MAX_RECORDING_MS = 30000; // hard cap — stop even if VAD never fires
 
 async function startRecording() {
   audioChunks = [];
@@ -803,13 +803,13 @@ async function startRecording() {
   try {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     audioContext = new AudioContextClass();
-    const source   = audioContext.createMediaStreamSource(mediaStream);
+    const source = audioContext.createMediaStreamSource(mediaStream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 512;
     source.connect(analyser);
 
     const bufferLength = analyser.frequencyBinCount;
-    const dataArray    = new Uint8Array(bufferLength);
+    const dataArray = new Uint8Array(bufferLength);
 
     mediaRecorder.start();
     if (voiceModeState === "listening") {
@@ -872,10 +872,10 @@ async function sendAudioToWhisper(blob) {
   voiceModeOverlay.classList.remove("listening", "speaking");
   voiceModeOverlay.classList.add("thinking");
   voiceStatusText.textContent = "Thinking...";
-  
+
   const formData = new FormData();
   formData.append("file", blob, "voice.webm");
-  
+
   try {
     const fetchHeaders = {};
     if (window.API_KEY) fetchHeaders["X-API-Key"] = window.API_KEY;
@@ -888,7 +888,7 @@ async function sendAudioToWhisper(blob) {
     if (!res.ok) throw new Error("Whisper transcription failed");
     const data = await res.json();
     const transcript = data.text.trim();
-    
+
     if (transcript) {
       voiceUserSpeech.textContent = `“${transcript}”`;
       voiceBotSpeech.textContent = "";
@@ -910,7 +910,7 @@ async function speakVoiceModeMessage(text) {
     activeAudio = null;
     el.onended = null;
     el.onerror = null;
-    Promise.resolve().then(() => { try { el.pause(); el.src = ""; } catch(_) {} });
+    Promise.resolve().then(() => { try { el.pause(); el.src = ""; } catch (_) { } });
   }
   if (window.speechSynthesis) window.speechSynthesis.cancel();
 
@@ -1033,7 +1033,7 @@ function exitVoiceMode() {
     mediaRecorder.onstop = null;
     mediaRecorder.ondataavailable = null;
     if (mediaRecorder.state === "recording") {
-      try { mediaRecorder.stop(); } catch(_) {}
+      try { mediaRecorder.stop(); } catch (_) { }
     }
     mediaRecorder = null;
   }
@@ -1058,7 +1058,7 @@ function exitVoiceMode() {
 
 function startVoiceModeListening() {
   voiceModeState = "listening";
-  
+
   voiceUserSpeech.textContent = "";
   voiceModeOverlay.classList.remove("thinking", "speaking");
   voiceModeOverlay.classList.add("listening");
@@ -1124,7 +1124,7 @@ function openPdfViewer(filename, pageNumber) {
       modal.classList.remove("open");
       document.getElementById("pdfViewerIframe").src = "";
     });
-    
+
     // Close on outside click
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {

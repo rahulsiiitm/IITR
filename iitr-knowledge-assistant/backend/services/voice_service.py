@@ -1,6 +1,5 @@
 import os
 import logging
-import tempfile
 from faster_whisper import WhisperModel
 
 logger = logging.getLogger(__name__)
@@ -49,7 +48,8 @@ def synthesize_text(text: str, output_path: str) -> None:
     to whatever path is given (callers rename to .mp3 or convert as needed).
     """
     from gtts import gTTS
-    import subprocess, shutil
+    import subprocess
+    import shutil
 
     # gTTS produces MP3; save as .mp3 first, then convert to WAV if ffmpeg is present
     mp3_path = output_path.replace(".wav", ".mp3")

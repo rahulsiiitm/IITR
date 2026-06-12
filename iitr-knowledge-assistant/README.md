@@ -63,7 +63,7 @@ FastAPI (port 45123)
         │
         ├── Context Builder + Evidence Extractor
         │
-        └── Ollama LLM (qwen2.5:7b-instruct-q4_K_M)
+        └── Ollama LLM (llama3.2)
               └── Streamed answer + source citations
 
 PostgreSQL ← Session & Message storage (SQLAlchemy asyncpg)
@@ -128,7 +128,7 @@ iitr-knowledge-assistant/
 - **[Ollama](https://ollama.com/)** running locally with the model pulled:
 
   ```bash
-  ollama pull qwen2.5:7b-instruct-q4_K_M
+  ollama pull llama3.2
   ```
 
 - **Docker + Docker Compose** (only needed for the containerised deployment path)
@@ -283,7 +283,7 @@ curl -X POST http://localhost:45123/ask \
   "chunk_count": 81,
   "embedding_model": "BAAI/bge-base-en-v1.5",
   "rerank_model": "BAAI/bge-reranker-base",
-  "llm_model": "qwen2.5:7b-instruct-q4_K_M"
+  "llm_model": "llama3.2"
 }
 ```
 
@@ -309,7 +309,7 @@ All config is loaded from environment variables (`.env` for local dev, `docker-c
 | Variable | Default | Description |
 | --- | --- | --- |
 | `OLLAMA_URL` | `http://localhost:11434/api/chat` | Ollama API endpoint |
-| `OLLAMA_MODEL` | `qwen2.5:7b-instruct-q4_K_M` | LLM model name |
+| `OLLAMA_MODEL` | `llama3.2` | LLM model name |
 | `EMBEDDING_MODEL` | `BAAI/bge-base-en-v1.5` | HuggingFace embedding model |
 | `RERANK_MODEL` | `BAAI/bge-reranker-base` | HuggingFace cross-encoder reranker |
 | `DATABASE_URL` | `postgresql+asyncpg://...@localhost:5432/sutra_db` | Async PostgreSQL connection string |

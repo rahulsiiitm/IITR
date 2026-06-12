@@ -1,9 +1,7 @@
 import asyncio
 import logging
 import sys
-from sqlalchemy.exc import OperationalError
 from backend.database import engine, Base
-from backend.models import Session, Message
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

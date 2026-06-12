@@ -153,12 +153,10 @@ button {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--gold) 0%,
-    rgba(200, 150, 30, 0.1) 70%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      var(--gold) 0%,
+      rgba(200, 150, 30, 0.1) 70%,
+      transparent 100%);
 }
 
 .header-brand {
@@ -166,6 +164,7 @@ button {
   align-items: center;
   gap: 12px;
 }
+
 .header-emblem {
   flex-shrink: 0;
   display: block;
@@ -215,6 +214,7 @@ button {
   background: rgba(255, 255, 255, 0.09);
   color: rgba(255, 255, 255, 0.9);
 }
+
 .icon-btn.close-btn:hover {
   color: #f87171;
   background: rgba(248, 113, 113, 0.1);
@@ -234,13 +234,16 @@ button {
 .chat::-webkit-scrollbar {
   width: 4px;
 }
+
 .chat::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .chat::-webkit-scrollbar-thumb {
   background: rgba(1, 25, 54, 0.09);
   border-radius: 8px;
 }
+
 .chat::-webkit-scrollbar-thumb:hover {
   background: rgba(1, 25, 54, 0.18);
 }
@@ -356,9 +359,11 @@ button {
 .msg-wrapper:last-child {
   padding-bottom: 14px;
 }
+
 .msg-wrapper.user {
   align-items: flex-end;
 }
+
 .msg-wrapper.bot {
   align-items: flex-start;
 }
@@ -436,28 +441,35 @@ button {
 .msg-bubble p {
   margin-bottom: 10px;
 }
+
 .msg-bubble p:last-of-type {
   margin-bottom: 0;
 }
+
 .msg-bubble strong {
   font-weight: 600;
   color: var(--text);
 }
+
 .msg-bubble em {
   color: var(--text-mid);
   font-style: italic;
 }
+
 .msg-bubble ul,
 .msg-bubble ol {
   margin: 8px 0 10px 20px;
 }
+
 .msg-bubble li {
   margin-bottom: 5px;
   line-height: 1.6;
 }
+
 .msg-bubble li::marker {
   color: var(--gold);
 }
+
 .msg-bubble blockquote {
   margin: 12px 0;
   padding: 10px 16px;
@@ -467,6 +479,7 @@ button {
   color: var(--text-mid);
   font-size: 0.9em;
 }
+
 .msg-bubble code {
   background: var(--bg-surface);
   border: 1px solid var(--border-mid);
@@ -476,6 +489,7 @@ button {
   font-family: "SF Mono", "Fira Code", monospace;
   color: var(--navy-light);
 }
+
 .msg-bubble h1,
 .msg-bubble h2,
 .msg-bubble h3 {
@@ -485,9 +499,11 @@ button {
   margin: 14px 0 6px;
   line-height: 1.4;
 }
+
 .msg-bubble h2 {
   font-size: 0.95rem;
 }
+
 .msg-bubble h3 {
   font-size: 0.88rem;
 }
@@ -552,17 +568,20 @@ button {
 .typing-indicator span:nth-child(1) {
   animation-delay: -0.32s;
 }
+
 .typing-indicator span:nth-child(2) {
   animation-delay: -0.16s;
 }
 
 @keyframes typingBounce {
+
   0%,
   80%,
   100% {
     transform: scale(0.7);
     opacity: 0.25;
   }
+
   40% {
     transform: scale(1.15);
     opacity: 0.85;
@@ -658,9 +677,11 @@ button {
   background: var(--navy-light);
   transform: scale(1.06);
 }
+
 #sendBtn:active {
   transform: scale(0.95);
 }
+
 #sendBtn:disabled {
   background: var(--text-light);
   cursor: not-allowed;
@@ -689,6 +710,7 @@ button {
     opacity: 0;
     transform: translateY(7px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -705,18 +727,22 @@ button {
     right: 0;
     max-height: none;
   }
+
   .bubble-btn {
     bottom: 20px;
     right: 20px;
   }
+
   .bubble-label {
     display: none;
   }
+
   .bubble-btn {
     padding: 0;
     width: 54px;
     justify-content: center;
   }
+
   .suggestions-grid {
     grid-template-columns: 1fr;
   }
@@ -797,15 +823,31 @@ button {
   transform-origin: bottom;
 }
 
-.soundwave-bar:nth-child(1) { animation-delay: 0.1s; height: 30%; }
-.soundwave-bar:nth-child(2) { animation-delay: 0.3s; height: 75%; }
-.soundwave-bar:nth-child(3) { animation-delay: 0.5s; height: 50%; }
-.soundwave-bar:nth-child(4) { animation-delay: 0.2s; height: 90%; }
+.soundwave-bar:nth-child(1) {
+  animation-delay: 0.1s;
+  height: 30%;
+}
+
+.soundwave-bar:nth-child(2) {
+  animation-delay: 0.3s;
+  height: 75%;
+}
+
+.soundwave-bar:nth-child(3) {
+  animation-delay: 0.5s;
+  height: 50%;
+}
+
+.soundwave-bar:nth-child(4) {
+  animation-delay: 0.2s;
+  height: 90%;
+}
 
 @keyframes bounceSoundwave {
   0% {
     transform: scaleY(0.3);
   }
+
   100% {
     transform: scaleY(1);
   }
@@ -896,9 +938,11 @@ button {
 .voice-overlay.listening .ring-1 {
   animation: rippleRing 2.4s infinite linear;
 }
+
 .voice-overlay.listening .ring-2 {
   animation: rippleRing 2.4s infinite linear 0.8s;
 }
+
 .voice-overlay.listening .ring-3 {
   animation: rippleRing 2.4s infinite linear 1.6s;
 }
@@ -907,9 +951,11 @@ button {
 .voice-overlay.speaking .ring-1 {
   animation: waveRing 1.5s infinite ease-in-out alternate;
 }
+
 .voice-overlay.speaking .ring-2 {
   animation: waveRing 1.5s infinite ease-in-out alternate 0.4s;
 }
+
 .voice-overlay.speaking .ring-3 {
   animation: waveRing 1.5s infinite ease-in-out alternate 0.8s;
 }
@@ -994,6 +1040,7 @@ button {
     transform: scale(0.5);
     opacity: 0.8;
   }
+
   100% {
     transform: scale(1.6);
     opacity: 0;
@@ -1006,11 +1053,13 @@ button {
     opacity: 0.4;
     border-radius: 45% 55% 50% 50% / 50% 50% 45% 55%;
   }
+
   50% {
     transform: scale(0.9);
     opacity: 0.6;
     border-radius: 55% 45% 55% 45% / 45% 55% 55% 45%;
   }
+
   100% {
     transform: scale(0.8);
     opacity: 0.5;
@@ -1022,6 +1071,7 @@ button {
   from {
     transform: rotate(0deg) scale(0.8);
   }
+
   to {
     transform: rotate(360deg) scale(0.8);
   }

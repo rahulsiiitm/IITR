@@ -6,7 +6,6 @@ import httpx
 from backend.config import settings
 from backend.generation.context_builder import build_context
 from backend.prompts import EVIDENCE_EXTRACTOR_PROMPT, SYSTEM_PROMPT, VERIFIER_PROMPT, build_greeting_prompt, build_user_prompt
-from backend.generation.rewriter import rewrite_query
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 sys.path.append(os.getcwd())
 
-from backend.generation.llm import _call_ollama
 from backend.query.processor import expand_query_intent
 
 async def main():

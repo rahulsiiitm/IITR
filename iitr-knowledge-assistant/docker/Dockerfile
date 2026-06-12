@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source code
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY assets/ ./assets/
 COPY data/ ./data/
 RUN mkdir -p vector_db/indexes vector_db/metadata
 COPY scripts/ ./scripts/
@@ -22,7 +23,7 @@ COPY scripts/ ./scripts/
 # Create environment variable defaults
 ENV PORT=45123
 ENV HOST=0.0.0.0
-ENV CUDA_VISIBLE_DEVICES=""
+# ENV CUDA_VISIBLE_DEVICES=""
 
 EXPOSE 45123
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="/admin.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
   <div class="admin-layout">
 
@@ -16,7 +18,8 @@
       <div class="sidebar-header">
         <div class="sidebar-brand">
           <div class="brand-icon">
-            <img src="/assets/favicon.ico" alt="IIT Roorkee" width="22" height="22" style="object-fit:contain;filter:brightness(0) invert(1);">
+            <img src="/assets/favicon.ico" alt="IIT Roorkee" width="20" height="20"
+              style="object-fit:contain;filter:brightness(0) invert(1);opacity:0.85;">
           </div>
           <div>
             <h2>Sutra Admin</h2>
@@ -46,11 +49,11 @@
         </div>
       </nav>
 
-      <!-- Sessions sidebar list (contextual) -->
       <div class="sessions-list" id="sessions-list" style="display:none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-          <div class="sessions-label" style="padding-bottom: 0;">Active Sessions</div>
-          <button class="btn btn-danger" id="btn-delete-all-sessions" style="padding: 2px 6px; font-size: 0.65rem; margin-right: 6px;" title="Delete all sessions">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 2px;">
+          <div class="sessions-label" style="padding-bottom:0;">Active Sessions</div>
+          <button class="btn btn-danger" id="btn-delete-all-sessions" style="padding:2px 7px;font-size:0.62rem;"
+            title="Delete all sessions">
             <i class="fa-solid fa-trash-can"></i> Clear All
           </button>
         </div>
@@ -68,27 +71,26 @@
         <div class="topbar-left">
           <div class="breadcrumb">
             <span>Sutra</span>
-            <span class="breadcrumb-sep">›</span>
+            <span class="breadcrumb-sep">/</span>
             <span id="breadcrumb-current">Dashboard</span>
           </div>
-          <span style="color:var(--border-strong)">·</span>
+          <div class="topbar-divider"></div>
           <h1 id="current-view-title">Overview</h1>
         </div>
         <div class="topbar-right">
           <div class="topbar-chip">
             <i class="fa-solid fa-circle-dot"></i>
-            <span id="topbar-model">Loading...</span>
+            <span id="topbar-model">Loading…</span>
           </div>
           <div class="topbar-iitr" title="IIT Roorkee">
-            <img src="/assets/favicon.ico" alt="IITR" width="20" height="20" style="object-fit:contain;">
+            <img src="/assets/favicon.ico" alt="IITR" width="18" height="18" style="object-fit:contain;">
           </div>
           <div class="topbar-avatar" title="Admin">A</div>
         </div>
       </header>
 
-      <!-- ══ DASHBOARD VIEW ══ -->
+      <!-- ══ DASHBOARD ══ -->
       <div class="view-container active" id="view-dashboard">
-        <!-- Watermark -->
         <div class="iitr-watermark" aria-hidden="true">
           <img src="/assets/favicon.ico" alt="">
         </div>
@@ -106,25 +108,28 @@
               <div class="stat-sub">unique conversations</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon" style="background:var(--gold-dim)"><i class="fa-solid fa-message" style="color:var(--gold)"></i></div>
+              <div class="stat-icon"><i class="fa-solid fa-message"></i></div>
               <div class="stat-label">Total Messages</div>
               <div class="stat-value" id="stat-messages">—</div>
               <div class="stat-sub">across all sessions</div>
             </div>
             <div class="stat-card">
-              <div class="stat-icon" style="background:rgba(1,25,54,0.07)"><i class="fa-solid fa-microchip" style="color:var(--navy-700)"></i></div>
+              <div class="stat-icon"><i class="fa-solid fa-microchip"></i></div>
               <div class="stat-label">LLM Model</div>
               <div class="stat-value mono" id="stat-llm">—</div>
               <div class="stat-sub">inference backend</div>
             </div>
           </div>
 
-          <div class="section-header" style="margin-top:4px;">
-            <div class="section-title">Recent Activity</div>
+          <div class="section-header" style="margin-top:6px;">
+            <div class="section-title">Pipeline Status</div>
           </div>
 
-          <div class="activity-card">
-            <h3><i class="fa-solid fa-bolt"></i> Live Feed</h3>
+          <div class="activity-card" style="margin-bottom:18px;">
+            <div class="activity-card-header">
+              <i class="fa-solid fa-bolt"></i>
+              <h3>Live Feed</h3>
+            </div>
             <div id="activity-feed">
               <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
             </div>
@@ -143,7 +148,7 @@
         </div>
       </div>
 
-      <!-- ══ SESSIONS VIEW ══ -->
+      <!-- ══ SESSIONS ══ -->
       <div class="view-container" id="view-sessions">
 
         <div class="messages-toolbar" id="messages-toolbar" style="display:none;">
@@ -151,7 +156,7 @@
             <i class="fa-solid fa-fingerprint"></i>
             <span id="active-session-id-pill">—</span>
           </div>
-          <div class="session-info-pill" id="msg-count-pill">
+          <div class="session-info-pill">
             <i class="fa-solid fa-message"></i>
             <span id="msg-count-label">— messages</span>
           </div>
@@ -174,7 +179,7 @@
 
       </div>
 
-      <!-- ══ SETTINGS VIEW ══ -->
+      <!-- ══ SETTINGS ══ -->
       <div class="view-container" id="view-settings">
         <div class="settings-scroll">
 
@@ -198,10 +203,11 @@
   </div>
 
   <script src="/api-config.js"></script>
-  <script src="admin.js?v=3"></script>
+  <script src="admin.js?v=5"></script>
 
-  <!-- Custom Confirm Modal -->
-  <div id="confirmModal" class="confirm-modal-backdrop" aria-modal="true" role="dialog" aria-labelledby="confirmModalTitle">
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="confirm-modal-backdrop" aria-modal="true" role="dialog"
+    aria-labelledby="confirmModalTitle">
     <div class="confirm-modal">
       <div class="confirm-modal-icon">
         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -217,4 +223,5 @@
     </div>
   </div>
 </body>
+
 </html>

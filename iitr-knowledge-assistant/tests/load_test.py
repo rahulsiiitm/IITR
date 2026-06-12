@@ -1,7 +1,6 @@
 import asyncio
 import httpx
 import time
-import sys
 from backend.config import settings
 
 async def fetch(client, url, payload, headers):
@@ -31,8 +30,8 @@ async def main():
     successes = sum(1 for r, _ in results if r == 200)
     failures = len(results) - successes
     
-    print(f"\n📊 Load Test Results:")
-    print(f"------------------------")
+    print("\n📊 Load Test Results:")
+    print("------------------------")
     print(f"Total Time:  {duration:.2f} seconds")
     print(f"Requests:    {num_requests}")
     print(f"Successes:   {successes}")

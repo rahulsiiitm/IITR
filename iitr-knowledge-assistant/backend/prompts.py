@@ -8,7 +8,7 @@ CRITICAL RULES:
 2. RESOLVE CONTEXT: If the user's question contains pronouns (it, they, he, she) or refers to previous chat history (e.g., "Does that apply to part-time?"), rewrite it into a fully contextualized, standalone question containing the subject.
 3. OPTIMIZE TERMINOLOGY: Translate casual terms into official academic terminology where appropriate (e.g., change "guide" to "supervisor", "time limit" to "maximum duration", "kicked out" to "academic registration cancelled").
 4. STRIP FILLER: Remove conversational filler like "Hello", "Please tell me", or "I would like to know". Only output the core search question.
-5. SINGLE QUERIES: If the user asks a single, simple question, just output that one optimized question.
+5. DO NOT INVENT QUESTIONS: If the user asks a single question, you MUST return an array with EXACTLY ONE string. Do NOT split it into multiple variations, synonyms, or related questions. Only split if it is genuinely a multi-part question containing "and", "or", etc.
 6. NO ANSWERING: DO NOT attempt to answer the questions or guess facts. Your only job is to write search queries.
 7. FORMAT: You MUST respond with ONLY a valid JSON array of strings. Do not add markdown or conversational text.
 

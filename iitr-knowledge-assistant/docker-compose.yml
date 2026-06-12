@@ -1,26 +1,29 @@
-version: '3.8'
 
 services:
   assistant:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    ports:
-      - "45123:45123"
+    network_mode: "host"
     environment:
-      - OLLAMA_URL=http://host.docker.internal:11434/api/chat
+      - OLLAMA_URL=http://127.0.0.1:11434/api/chat
       - EMBEDDING_MODEL=BAAI/bge-base-en-v1.5
       - RERANK_MODEL=BAAI/bge-reranker-base
-      - OLLAMA_MODEL=qwen2.5:7b-instruct-q4_K_M
+      - OLLAMA_MODEL=llama3.2
       - OLLAMA_NUM_PARALLEL=4
-      - DATABASE_URL=postgresql+asyncpg://sutra_admin:sutra_secure_password@postgres:5432/sutra_db
+      - DATABASE_URL=postgresql+asyncpg://sutra_admin:sutra_secure_password@127.0.0.1:5432/sutra_db
       - API_KEY=${API_KEY}
       - API_PORT=45123
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/app/data
       - ./vector_db:/app/vector_db
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     restart: always
     depends_on:
       postgres:
@@ -38,6 +41,14 @@ services:
     volumes:
       - sutra_pg_data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    network_mode: "host"
+    command: tunnel --url http://127.0.0.1:45123
+    restart: always
+    depends_on:
+      - assistant
 
 volumes:
   sutra_pg_data:

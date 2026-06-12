@@ -8,7 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.config import settings
-from backend.indexing.build_index import build_and_save_index, ingest_document
+from backend.indexing.build_index import build_and_save_index
 
 
 def main() -> None:

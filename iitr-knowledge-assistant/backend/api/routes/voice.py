@@ -1,6 +1,5 @@
 import os
 import uuid
-import shutil
 import logging
 import tempfile
 from fastapi import APIRouter, UploadFile, File, HTTPException

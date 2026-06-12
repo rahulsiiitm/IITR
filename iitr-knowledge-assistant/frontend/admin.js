@@ -1,35 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ── DOM refs ── */
-  const navItems           = document.querySelectorAll('.nav-item');
-  const viewContainers     = document.querySelectorAll('.view-container');
-  const currentViewTitle   = document.getElementById('current-view-title');
-  const breadcrumbCurrent  = document.getElementById('breadcrumb-current');
-  const sessionsListEl     = document.getElementById('sessions-list');
-  const messagesContainer  = document.getElementById('messages-container');
-  const emptyState         = document.getElementById('empty-state');
-  const sessionActions     = document.getElementById('session-actions');
+  const navItems = document.querySelectorAll('.nav-item');
+  const viewContainers = document.querySelectorAll('.view-container');
+  const currentViewTitle = document.getElementById('current-view-title');
+  const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+  const sessionsListEl = document.getElementById('sessions-list');
+  const messagesContainer = document.getElementById('messages-container');
+  const emptyState = document.getElementById('empty-state');
+  const sessionActions = document.getElementById('session-actions');
   const sessionActionsMeta = document.getElementById('session-actions-meta');
-  const messagesToolbar    = document.getElementById('messages-toolbar');
-  const btnDeleteSession   = document.getElementById('btn-delete-session');
+  const messagesToolbar = document.getElementById('messages-toolbar');
+  const btnDeleteSession = document.getElementById('btn-delete-session');
   const btnDeleteAllSessions = document.getElementById('btn-delete-all-sessions');
-  const sessionsBadge      = document.getElementById('sessions-badge');
-  const topbarModel        = document.getElementById('topbar-model');
+  const sessionsBadge = document.getElementById('sessions-badge');
+  const topbarModel = document.getElementById('topbar-model');
 
-  let currentSessionId  = null;
-  let currentMsgCount   = 0;
+  let currentSessionId = null;
+  let currentMsgCount = 0;
 
   /* ── Confirm Modal ── */
-  const confirmModal       = document.getElementById('confirmModal');
-  const confirmModalTitle  = document.getElementById('confirmModalTitle');
-  const confirmModalBody   = document.getElementById('confirmModalBody');
-  const confirmModalOk     = document.getElementById('confirmModalOk');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmModalTitle = document.getElementById('confirmModalTitle');
+  const confirmModalBody = document.getElementById('confirmModalBody');
+  const confirmModalOk = document.getElementById('confirmModalOk');
   const confirmModalCancel = document.getElementById('confirmModalCancel');
 
   function showConfirm(title, body) {
     return new Promise(resolve => {
       confirmModalTitle.textContent = title;
-      confirmModalBody.textContent  = body;
+      confirmModalBody.textContent = body;
       confirmModal.classList.add('open');
 
       function cleanup(result) {
@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         resolve(result);
       }
 
-      function onOk()      { cleanup(true);  }
-      function onCancel()  { cleanup(false); }
+      function onOk() { cleanup(true); }
+      function onCancel() { cleanup(false); }
       function onBackdrop(e) { if (e.target === confirmModal) cleanup(false); }
 
       confirmModalOk.addEventListener('click', onOk);
@@ -52,31 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const VIEW_TITLES = {
     dashboard: ['Dashboard', 'Overview'],
-    sessions:  ['Sessions', 'Conversation Log'],
-    settings:  ['Settings', 'Configuration'],
+    sessions: ['Sessions', 'Conversation Log'],
+    settings: ['Settings', 'Configuration'],
   };
 
   /* ── Utilities ── */
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-      .replace(/'/g,'&#039;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function relativeTime(dateStr) {
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
     const diff = (Date.now() - new Date(dateStr)) / 1000;
-    if (diff < 60)    return 'just now';
-    if (diff < 3600)  return `${Math.floor(diff/60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-    return `${Math.floor(diff/86400)}d ago`;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
   }
 
   function formatDate(dateStr) {
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
     return new Date(dateStr).toLocaleString('en-IN', {
-      day:'2-digit', month:'short', year:'numeric',
-      hour:'2-digit', minute:'2-digit',
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
   }
 
@@ -89,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const [bc, title] = VIEW_TITLES[view];
       breadcrumbCurrent.textContent = bc;
-      currentViewTitle.textContent  = title;
+      currentViewTitle.textContent = title;
 
       viewContainers.forEach(c => c.classList.remove('active'));
       document.getElementById(`view-${view}`).classList.add('active');
@@ -102,19 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (view === 'dashboard') loadDashboardStats();
-      if (view === 'settings')  loadSettings();
+      if (view === 'settings') loadSettings();
     });
   });
 
   /* ══ DASHBOARD ══ */
   async function loadDashboardStats() {
     try {
-      const res  = await fetch('/api/admin/stats');
+      const res = await fetch('/api/admin/stats');
       const data = await res.json();
 
       document.getElementById('stat-sessions').textContent = data.total_sessions ?? '—';
       document.getElementById('stat-messages').textContent = data.total_messages ?? '—';
-      document.getElementById('stat-llm').textContent      = data.llm_model      ?? '—';
+      document.getElementById('stat-llm').textContent = data.llm_model ?? '—';
       topbarModel.textContent = data.llm_model ? data.llm_model.split(':')[0] : '—';
 
       renderActivityFeed(data);
@@ -127,10 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderActivityFeed(data) {
     const feed = document.getElementById('activity-feed');
     const items = [
-      { dot: 'dot-blue',  text: `Chatbot serving <strong>${data.total_sessions ?? 0}</strong> sessions`, time: 'now' },
+      { dot: 'dot-blue', text: `Chatbot serving <strong>${data.total_sessions ?? 0}</strong> sessions`, time: 'now' },
       { dot: 'dot-green', text: `Retrieval pipeline: BM25 + FAISS + RRF hybrid`, time: 'active' },
       { dot: 'dot-green', text: `Cross-encoder reranking enabled`, time: 'active' },
-      { dot: 'dot-blue',  text: `SSE streaming active`, time: 'active' },
+      { dot: 'dot-blue', text: `SSE streaming active`, time: 'active' },
       { dot: 'dot-amber', text: `Model: ${escapeHtml(data.llm_model ?? 'unknown')}`, time: 'config' },
     ];
     feed.innerHTML = items.map(i => `
@@ -145,15 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSystemInfo(data) {
     const grid = document.getElementById('system-info-grid');
     const entries = Object.entries(data).filter(([k]) =>
-      !['total_sessions','total_messages','llm_model'].includes(k)
+      !['total_sessions', 'total_messages', 'llm_model'].includes(k)
     );
     if (!entries.length) {
       grid.innerHTML = '';
       return;
     }
     grid.innerHTML = entries.map(([key, val]) => {
-      const label = key.split('_').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
-      const icon  = iconForKey(key);
+      const label = key.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+      const icon = iconForKey(key);
       return `
         <div class="info-card">
           <div class="info-card-label"><i class="fa-solid ${icon}"></i> ${label}</div>
@@ -177,19 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ══ SETTINGS ══ */
-  window.loadSettings = async function() {
+  window.loadSettings = async function () {
     const grid = document.getElementById('settings-grid');
     grid.innerHTML = `<div class="loading-spinner" style="grid-column:span 2"><i class="fa-solid fa-circle-notch fa-spin"></i></div>`;
     try {
-      const res  = await fetch('/api/admin/settings');
+      const res = await fetch('/api/admin/settings');
       const data = await res.json();
 
       // Group settings into logical cards
       const groups = {
-        'Retrieval': ['top_k','threshold','chunks','reranker','retriever'],
-        'Model':     ['llm_model','model','embed','embedding'],
-        'Storage':   ['db','database','host','port','path'],
-        'Server':    ['version','debug','env','workers'],
+        'Retrieval': ['top_k', 'threshold', 'chunks', 'reranker', 'retriever'],
+        'Model': ['llm_model', 'model', 'embed', 'embedding'],
+        'Storage': ['db', 'database', 'host', 'port', 'path'],
+        'Server': ['version', 'debug', 'env', 'workers'],
       };
 
       const assigned = new Set();
@@ -203,8 +205,8 @@ document.addEventListener('DOMContentLoaded', () => {
         matches.forEach(([k]) => assigned.add(k));
 
         const icon = {
-          'Retrieval':'fa-magnifying-glass', 'Model':'fa-microchip',
-          'Storage':'fa-database', 'Server':'fa-server',
+          'Retrieval': 'fa-magnifying-glass', 'Model': 'fa-microchip',
+          'Storage': 'fa-database', 'Server': 'fa-server',
         }[groupName] || 'fa-gear';
 
         html += `
@@ -213,15 +215,15 @@ document.addEventListener('DOMContentLoaded', () => {
               <i class="fa-solid ${icon}"></i>
               <h3>${groupName}</h3>
             </div>
-            ${matches.map(([k,v]) => {
-              const label = k.split('_').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
-              return `
+            ${matches.map(([k, v]) => {
+          const label = k.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+          return `
                 <div class="setting-item">
                   <div class="setting-label">${label}</div>
                   <div class="setting-value" title="${escapeHtml(String(v))}">${escapeHtml(String(v))}</div>
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
         `;
       }
@@ -235,15 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
               <i class="fa-solid fa-ellipsis"></i>
               <h3>Other</h3>
             </div>
-            ${remaining.map(([k,v]) => {
-              const label = k.split('_').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
-              return `
+            ${remaining.map(([k, v]) => {
+          const label = k.split('_').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+          return `
                 <div class="setting-item">
                   <div class="setting-label">${label}</div>
                   <div class="setting-value" title="${escapeHtml(String(v))}">${escapeHtml(String(v))}</div>
                 </div>
               `;
-            }).join('')}
+        }).join('')}
           </div>
         `;
       }
@@ -259,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function fetchSessions() {
     sessionsListEl.innerHTML = `<div class="sessions-label">Active Sessions</div><div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>`;
     try {
-      const res      = await fetch('/api/admin/sessions');
+      const res = await fetch('/api/admin/sessions');
       if (!res.ok) throw new Error('Failed');
       const sessions = await res.json();
       renderSessions(sessions);
@@ -285,17 +287,17 @@ document.addEventListener('DOMContentLoaded', () => {
         </button>
       </div>
     `;
-    
+
     // Re-attach listener since we replaced innerHTML
     document.getElementById('btn-delete-all-sessions').addEventListener('click', handleDeleteAllSessions);
-    
+
     if (!sessions.length) {
       sessionsListEl.innerHTML += `<div class="empty-state" style="padding:16px;"><p>No sessions found.</p></div>`;
       sessionsBadge.style.display = 'none';
       return;
     }
     sessions.forEach(session => {
-      const el  = document.createElement('div');
+      const el = document.createElement('div');
       el.className = 'session-item';
       el.innerHTML = `
         <div class="session-id">${session.id}</div>
@@ -318,16 +320,16 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadSessionMessages(sessionId, createdAt) {
-    emptyState.style.display         = 'none';
-    sessionActions.style.display     = 'none';
-    messagesToolbar.style.display    = 'none';
-    messagesContainer.innerHTML      = `<div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>`;
-    currentViewTitle.textContent     = 'Conversation Log';
+    emptyState.style.display = 'none';
+    sessionActions.style.display = 'none';
+    messagesToolbar.style.display = 'none';
+    messagesContainer.innerHTML = `<div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>`;
+    currentViewTitle.textContent = 'Conversation Log';
 
     document.getElementById('active-session-id-pill').textContent = sessionId;
 
     try {
-      const res  = await fetch(`/api/admin/sessions/${sessionId}/messages`);
+      const res = await fetch(`/api/admin/sessions/${sessionId}/messages`);
       if (!res.ok) throw new Error('Failed');
       const msgs = await res.json();
       renderMessages(msgs);
@@ -362,14 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     messages.forEach(msg => {
       const isUser = msg.role === 'user';
-      const el     = document.createElement('div');
+      const el = document.createElement('div');
       el.className = `message msg-${msg.role}`;
 
       let sourcesHtml = '';
       if (msg.sources) {
         let sources = msg.sources;
         if (typeof sources === 'string') {
-          try { sources = JSON.parse(sources); } catch(_) {}
+          try { sources = JSON.parse(sources); } catch (_) { }
         }
         if (Array.isArray(sources) && sources.length) {
           const tags = sources.map(s => {
@@ -413,9 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Session deleted.</p>
             <span>Select another session from the sidebar.</span>
           </div>`;
-        sessionActions.style.display  = 'none';
+        sessionActions.style.display = 'none';
         messagesToolbar.style.display = 'none';
-        currentViewTitle.textContent  = 'Conversation Log';
+        currentViewTitle.textContent = 'Conversation Log';
         currentSessionId = null;
         sessionsListEl.removeAttribute('data-loaded');
         fetchSessions();
@@ -444,9 +446,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>All sessions deleted.</p>
             <span>The database is now empty.</span>
           </div>`;
-        sessionActions.style.display  = 'none';
+        sessionActions.style.display = 'none';
         messagesToolbar.style.display = 'none';
-        currentViewTitle.textContent  = 'Conversation Log';
+        currentViewTitle.textContent = 'Conversation Log';
         currentSessionId = null;
         sessionsListEl.removeAttribute('data-loaded');
         fetchSessions();
