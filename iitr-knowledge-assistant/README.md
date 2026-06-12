@@ -126,9 +126,11 @@ iitr-knowledge-assistant/
 
 - **Python 3.11+**
 - **[Ollama](https://ollama.com/)** running locally with the model pulled:
+
   ```bash
   ollama pull qwen2.5:7b-instruct-q4_K_M
   ```
+
 - **Docker + Docker Compose** (only needed for the containerised deployment path)
 
 ---
@@ -206,6 +208,7 @@ docker compose up --build -d
 ```
 
 This starts:
+
 - **`assistant`** — FastAPI app on port 45123
 - **`sutra_postgres`** — PostgreSQL 15 with a persistent named volume (`sutra_pg_data`)
 
@@ -247,7 +250,7 @@ curl -X POST http://localhost:45123/ask/stream \
 **Event types:**
 
 | Event | Fields | Description |
-|---|---|---|
+| --- | --- | --- |
 | `token` | `content` | One streamed token |
 | `done` | `session_id`, `sources` | Final event with citation list |
 | `error` | `content` | Pipeline error message |
@@ -291,7 +294,7 @@ curl -X POST http://localhost:45123/ask \
 Available at **`/admin.html`** (no auth required in test mode).
 
 | Section | Description |
-|---|---|
+| --- | --- |
 | **Dashboard** | Total sessions, messages, uptime |
 | **Sessions** | Browse all chat sessions, view message history |
 | **Settings** | Live view of all active configuration values |
@@ -304,7 +307,7 @@ Available at **`/admin.html`** (no auth required in test mode).
 All config is loaded from environment variables (`.env` for local dev, `docker-compose.yml` for Docker).
 
 | Variable | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `OLLAMA_URL` | `http://localhost:11434/api/chat` | Ollama API endpoint |
 | `OLLAMA_MODEL` | `qwen2.5:7b-instruct-q4_K_M` | LLM model name |
 | `EMBEDDING_MODEL` | `BAAI/bge-base-en-v1.5` | HuggingFace embedding model |
@@ -341,7 +344,7 @@ venv/bin/python tests/run_fresh_tests.py
 ## Roadmap
 
 | Phase | Status | Details |
-|---|---|---|
+| --- | --- | --- |
 | 1 — Single PDF prototype | ✅ Done | Basic FAISS retrieval |
 | 2 — Hybrid Retrieval + Reranking | ✅ Done | BM25 + FAISS + RRF fusion, cross-encoder reranking, numerical shortcuts — **100% accuracy, 0% hallucinations** on test suite |
 | 3 — FastAPI + PostgreSQL + streaming | ✅ Done | Async SQLAlchemy, Docker PostgreSQL, SSE streaming, session history |
