@@ -88,7 +88,7 @@ def health():
 
 # Serve chat UI on the same port (explicit routes — root StaticFiles breaks POST /ask)
 _frontend_dir = PROJECT_ROOT / "frontend"
-_FRONTEND_FILES = ("index.html", "script.js", "style.css", "api-config.js", "admin.html", "admin.js", "admin.css")
+_FRONTEND_FILES = ("index.html", "script.js", "style.css", "admin.html", "admin.js", "admin.css")
 
 
 def _serve_frontend_file(name: str):
@@ -105,6 +105,13 @@ if _frontend_dir.is_dir():
     @app.get("/")
     def serve_index():
         return _serve_frontend_file("index.html")
+
+    @app.get("/api-config.js")
+    def serve_api_config():
+        from fastapi.responses import PlainTextResponse
+        api_key_line = f"window.API_KEY = '{settings.api_key}';\n" if settings.api_key else ""
+        content = f"window.API_SAME_ORIGIN = true;\nwindow.API_PORT = {settings.api_port};\n{api_key_line}"
+        return PlainTextResponse(content, media_type="application/javascript")
 
     for _name in _FRONTEND_FILES:
         if _name == "index.html":
