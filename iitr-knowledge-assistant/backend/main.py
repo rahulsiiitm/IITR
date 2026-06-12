@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging(settings.log_level)
-    print(f"USING FAISS PATH: {settings.faiss_index_path}")
+    logger.info(f"USING FAISS PATH: {settings.faiss_index_path}")
     logger.info("Loading FAISS index from %s", settings.faiss_index_path)
 
     try:

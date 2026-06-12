@@ -94,7 +94,7 @@ async def extract_evidence(question: str, context_chunks: list[dict]) -> str:
     """Extract evidence from context chunks for a specific query."""
     context = build_context(context_chunks)
     if context_chunks:
-        print(f"Retrieving evidence for: '{question}' (Chunk 1 Length: {len(context_chunks[0].get('chunk', context_chunks[0].get('text', '')))})")
+        logger.debug(f"Retrieving evidence for: '{question}' (Chunk 1 Length: {len(context_chunks[0].get('chunk', context_chunks[0].get('text', '')))})")
     
     extractor_user = (
         f"Context:\n{context}\n\n"
@@ -104,7 +104,7 @@ async def extract_evidence(question: str, context_chunks: list[dict]) -> str:
     )
     evidence = await _call_ollama(EVIDENCE_EXTRACTOR_PROMPT, extractor_user)
 
-    print(f"--- EXTRACTED EVIDENCE for '{question}' ---\n{evidence}\n--------------------------")
+    logger.debug(f"--- EXTRACTED EVIDENCE for '{question}' ---\n{evidence}\n--------------------------")
     
     match = re.search(r"<evidence>(.*?)</evidence>", evidence, re.DOTALL | re.IGNORECASE)
     evidence_text = match.group(1).strip() if match else evidence.strip()

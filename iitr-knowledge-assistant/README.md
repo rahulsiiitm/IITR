@@ -30,8 +30,9 @@
 - 💬 **Streaming responses** — SSE token-by-token streaming to the browser
 - 🗂️ **Session memory** — PostgreSQL-backed persistent chat history across sessions
 - 🛡️ **Hallucination mitigation** — entity blocking, confidence thresholds, strict prompt engineering
-- 📊 **Admin dashboard** — live session browser, system metrics, config viewer, bulk delete
-- 🐳 **Dockerised** — single `docker-compose up` spins up the API + PostgreSQL
+- 📊 **Admin dashboard** — live session browser, system metrics, config viewer, bulk delete, featuring a polished IITR-themed glassmorphic UI
+- 🐳 **Dockerised** — single `docker-compose up` spins up the API, PostgreSQL, and a Cloudflare tunnel for instant public access
+- ⚡ **GPU Accelerated** — natively passes through NVIDIA GPUs via NVIDIA Container Toolkit for high-performance inference
 
 ---
 
@@ -209,8 +210,9 @@ docker compose up --build -d
 
 This starts:
 
-- **`assistant`** — FastAPI app on port 45123
+- **`assistant`** — FastAPI app on port 45123 (uses host networking to connect to local Ollama, requires NVIDIA GPU)
 - **`sutra_postgres`** — PostgreSQL 15 with a persistent named volume (`sutra_pg_data`)
+- **`cloudflared`** — Generates a temporary public HTTPS tunnel URL for immediate external testing
 
 Database tables are created automatically on first start via `init_db.py` (with retry logic to wait for Postgres to be ready).
 
@@ -228,7 +230,13 @@ docker compose down
 docker compose down -v
 ```
 
-> **Ollama on the host:** The container calls Ollama at `http://host.docker.internal:11434/api/chat`. Make sure Ollama is running on your host machine before starting the containers.
+> **Ollama on the host:** The `assistant` container uses `network_mode: "host"`. Make sure Ollama is running on your host machine before starting the containers, and ensure you have the `nvidia-container-toolkit` installed for GPU passthrough.
+
+### 5. Accessing Publicly
+The `cloudflared` service automatically generates a secure, public HTTPS URL for testing. To find your public URL, run:
+```bash
+docker compose logs cloudflared | grep trycloudflare.com
+```
 
 ---
 
@@ -350,6 +358,6 @@ venv/bin/python tests/run_fresh_tests.py
 | 3 — FastAPI + PostgreSQL + streaming | ✅ Done | Async SQLAlchemy, Docker PostgreSQL, SSE streaming, session history |
 | 4 — Intent routing + conversational AI | ✅ Done | Local zero-shot classifier, LLM direct path for off-topic queries |
 | 5 — Admin dashboard | ✅ Done | Session browser, metrics, config viewer, bulk delete |
-| 6 — Voice interaction | 🔧 In progress | Whisper transcription + TTS synthesis (disabled pending integration) |
+| 6 — Voice interaction | ✅ Done | Whisper transcription + TTS synthesis integrated |
 | 7 — Multi-document support | 📋 Planned | Upload new PDFs, rebuild index per document |
-| 8 — Production hardening | 📋 Planned | Auth on admin panel, rate limiting, monitoring |
+| 8 — Production hardening | ✅ Done | Cloudflare tunneling, GPU containerization, timezone bugfixes, and UI polish |

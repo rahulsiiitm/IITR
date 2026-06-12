@@ -11,7 +11,7 @@ services:
       - RERANK_MODEL=BAAI/bge-reranker-base
       - OLLAMA_MODEL=llama3.2
       - OLLAMA_NUM_PARALLEL=4
-      - DATABASE_URL=postgresql+asyncpg://sutra_admin:sutra_secure_password@127.0.0.1:5432/sutra_db
+      - DATABASE_URL=${DATABASE_URL}
       - API_KEY=${API_KEY}
       - API_PORT=45123
     volumes:
@@ -33,9 +33,9 @@ services:
     image: postgres:15-alpine
     container_name: sutra_postgres
     environment:
-      POSTGRES_USER: sutra_admin
-      POSTGRES_PASSWORD: sutra_secure_password
-      POSTGRES_DB: sutra_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:

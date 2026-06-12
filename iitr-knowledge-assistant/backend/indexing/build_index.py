@@ -1,5 +1,8 @@
 import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 import faiss
 import numpy as np
@@ -34,7 +37,7 @@ def build_and_save_index() -> tuple[faiss.IndexFlatIP, list[dict]]:
         raise FileNotFoundError(f"Data dir not found: {settings.data_dir}")
         
     for pdf_path in settings.data_dir.glob("*.pdf"):
-        print(f"Processing: {pdf_path.name}")
+        logger.info(f"Processing: {pdf_path.name}")
         doc_chunks = ingest_document(pdf_path, start_id)
         chunks.extend(doc_chunks)
         start_id += len(doc_chunks)
