@@ -1,98 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sutra Admin Panel</title>
-    <link rel="stylesheet" href="/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sutra Admin — IIT Roorkee</title>
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/admin.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
-    <div class="admin-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2><i class="fa-solid fa-shield-halved"></i> Sutra Admin</h2>
-                <p>System Management</p>
-            </div>
-            <div class="sidebar-nav">
-                <div class="nav-item active" data-view="dashboard">
-                    <i class="fa-solid fa-chart-pie"></i> Dashboard
-                </div>
-                <div class="nav-item" data-view="sessions">
-                    <i class="fa-solid fa-message"></i> Sessions
-                </div>
-                <div class="nav-item" data-view="settings">
-                    <i class="fa-solid fa-gear"></i> Settings
-                </div>
-            </div>
-            
-            <!-- Contextual sidebar for Sessions -->
-            <div class="sessions-list" id="sessions-list" style="display: none;">
-                <div class="loading-spinner" id="sessions-loading"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-            </div>
-        </aside>
-        
-        <main class="main-content">
-            <header class="topbar">
-                <h1 id="current-view-title">Dashboard Overview</h1>
-            </header>
-            
-            <!-- Dashboard View -->
-            <div class="view-container active" id="view-dashboard">
-                <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <i class="fa-solid fa-users"></i>
-                        <div class="stat-info">
-                            <h3>Total Sessions</h3>
-                            <p id="stat-sessions">...</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fa-solid fa-messages"></i>
-                        <div class="stat-info">
-                            <h3>Total Messages</h3>
-                            <p id="stat-messages">...</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fa-solid fa-microchip"></i>
-                        <div class="stat-info">
-                            <h3>LLM Model</h3>
-                            <p id="stat-llm" style="font-size: 1rem; overflow:hidden; text-overflow: ellipsis;">...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="admin-layout">
 
-            <!-- Sessions View -->
-            <div class="view-container" id="view-sessions">
-                <div class="messages-container" id="messages-container">
-                    <div class="empty-state" id="empty-state">
-                        <i class="fa-solid fa-database"></i>
-                        <p>Select a session from the sidebar to view its messages.</p>
-                    </div>
-                </div>
-                <div class="session-actions" id="session-actions" style="display: none;">
-                    <button class="btn btn-danger" id="btn-delete-session"><i class="fa-solid fa-trash"></i> Delete Session</button>
-                </div>
-            </div>
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-icon">
+            <img src="/assets/favicon.ico" alt="IIT Roorkee" width="22" height="22" style="object-fit:contain;filter:brightness(0) invert(1);">
+          </div>
+          <div>
+            <h2>Sutra Admin</h2>
+            <span class="brand-inst">IIT Roorkee</span>
+          </div>
+        </div>
+        <div class="status-badge">
+          <div class="pulse-dot"></div>
+          System Online
+        </div>
+        <p class="sidebar-scope">PhD Regulations 2026</p>
+      </div>
 
-            <!-- Settings View -->
-            <div class="view-container" id="view-settings">
-                <div class="settings-container">
-                    <div class="settings-card">
-                        <h2>System Configuration</h2>
-                        <div class="settings-list" id="settings-list">
-                            <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
-                        </div>
-                    </div>
-                </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-view="dashboard">
+          <i class="fa-solid fa-chart-pie"></i>
+          Dashboard
+        </div>
+        <div class="nav-item" data-view="sessions">
+          <i class="fa-solid fa-message"></i>
+          Sessions
+          <span class="nav-badge" id="sessions-badge"></span>
+        </div>
+        <div class="nav-item" data-view="settings">
+          <i class="fa-solid fa-gear"></i>
+          Settings
+        </div>
+      </nav>
+
+      <!-- Sessions sidebar list (contextual) -->
+      <div class="sessions-list" id="sessions-list" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <div class="sessions-label" style="padding-bottom: 0;">Active Sessions</div>
+          <button class="btn btn-danger" id="btn-delete-all-sessions" style="padding: 2px 6px; font-size: 0.65rem; margin-right: 6px;" title="Delete all sessions">
+            <i class="fa-solid fa-trash-can"></i> Clear All
+          </button>
+        </div>
+        <div class="loading-spinner" id="sessions-loading">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="breadcrumb">
+            <span>Sutra</span>
+            <span class="breadcrumb-sep">›</span>
+            <span id="breadcrumb-current">Dashboard</span>
+          </div>
+          <span style="color:var(--border-strong)">·</span>
+          <h1 id="current-view-title">Overview</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-chip">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span id="topbar-model">Loading...</span>
+          </div>
+          <div class="topbar-iitr" title="IIT Roorkee">
+            <img src="/assets/favicon.ico" alt="IITR" width="20" height="20" style="object-fit:contain;">
+          </div>
+          <div class="topbar-avatar" title="Admin">A</div>
+        </div>
+      </header>
+
+      <!-- ══ DASHBOARD VIEW ══ -->
+      <div class="view-container active" id="view-dashboard">
+        <!-- Watermark -->
+        <div class="iitr-watermark" aria-hidden="true">
+          <img src="/assets/favicon.ico" alt="">
+        </div>
+        <div class="dashboard-scroll">
+
+          <div class="section-header">
+            <div class="section-title">Key Metrics</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="stat-label">Total Sessions</div>
+              <div class="stat-value" id="stat-sessions">—</div>
+              <div class="stat-sub">unique conversations</div>
             </div>
-        </main>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--gold-dim)"><i class="fa-solid fa-message" style="color:var(--gold)"></i></div>
+              <div class="stat-label">Total Messages</div>
+              <div class="stat-value" id="stat-messages">—</div>
+              <div class="stat-sub">across all sessions</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:rgba(1,25,54,0.07)"><i class="fa-solid fa-microchip" style="color:var(--navy-700)"></i></div>
+              <div class="stat-label">LLM Model</div>
+              <div class="stat-value mono" id="stat-llm">—</div>
+              <div class="stat-sub">inference backend</div>
+            </div>
+          </div>
+
+          <div class="section-header" style="margin-top:4px;">
+            <div class="section-title">Recent Activity</div>
+          </div>
+
+          <div class="activity-card">
+            <h3><i class="fa-solid fa-bolt"></i> Live Feed</h3>
+            <div id="activity-feed">
+              <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="section-title">System Info</div>
+          </div>
+
+          <div class="info-grid" id="system-info-grid">
+            <div class="loading-spinner" style="grid-column:span 2">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ SESSIONS VIEW ══ -->
+      <div class="view-container" id="view-sessions">
+
+        <div class="messages-toolbar" id="messages-toolbar" style="display:none;">
+          <div class="session-info-pill">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span id="active-session-id-pill">—</span>
+          </div>
+          <div class="session-info-pill" id="msg-count-pill">
+            <i class="fa-solid fa-message"></i>
+            <span id="msg-count-label">— messages</span>
+          </div>
+        </div>
+
+        <div class="messages-container" id="messages-container">
+          <div class="empty-state" id="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <p>No session selected</p>
+            <span>Choose a session from the sidebar to inspect its conversation log.</span>
+          </div>
+        </div>
+
+        <div class="session-actions" id="session-actions" style="display:none;">
+          <div class="session-actions-meta" id="session-actions-meta"></div>
+          <button class="btn btn-danger" id="btn-delete-session">
+            <i class="fa-solid fa-trash-can"></i> Delete Session
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ══ SETTINGS VIEW ══ -->
+      <div class="view-container" id="view-settings">
+        <div class="settings-scroll">
+
+          <div class="section-header">
+            <div class="section-title">System Configuration</div>
+            <button class="btn btn-secondary" onclick="loadSettings()">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+
+          <div class="settings-grid" id="settings-grid">
+            <div class="loading-spinner" style="grid-column:span 2">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/api-config.js"></script>
+  <script src="admin.js?v=3"></script>
+
+  <!-- Custom Confirm Modal -->
+  <div id="confirmModal" class="confirm-modal-backdrop" aria-modal="true" role="dialog" aria-labelledby="confirmModalTitle">
+    <div class="confirm-modal">
+      <div class="confirm-modal-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 id="confirmModalTitle" class="confirm-modal-title">Confirm Delete</h3>
+      <p id="confirmModalBody" class="confirm-modal-body">This action cannot be undone.</p>
+      <div class="confirm-modal-actions">
+        <button id="confirmModalCancel" class="btn btn-secondary">Cancel</button>
+        <button id="confirmModalOk" class="btn btn-danger">
+          <i class="fa-solid fa-trash-can"></i> Delete
+        </button>
+      </div>
     </div>
-
-    <script src="/api-config.js"></script>
-    <script src="/admin.js"></script>
+  </div>
 </body>
 </html>

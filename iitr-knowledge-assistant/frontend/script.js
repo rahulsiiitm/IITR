@@ -497,17 +497,18 @@ async function sendToBackend(question) {
 
 // ── Voice Toggle Button ────────────────────────────────
 function updateVoiceToggleUI() {
+  if (!voiceToggleBtn) return;
   if (autoReadAloud) {
     voiceToggleBtn.classList.add("active");
     voiceToggleBtn.title = "Auto Read Aloud (On)";
-    voiceToggleIcon.innerHTML = `
+    if (voiceToggleIcon) voiceToggleIcon.innerHTML = `
       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
       <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
     `;
   } else {
     voiceToggleBtn.classList.remove("active");
     voiceToggleBtn.title = "Auto Read Aloud (Off)";
-    voiceToggleIcon.innerHTML = `
+    if (voiceToggleIcon) voiceToggleIcon.innerHTML = `
       <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
       <line x1="23" y1="9" x2="17" y2="15" />
       <line x1="17" y1="9" x2="23" y2="15" />
@@ -517,14 +518,16 @@ function updateVoiceToggleUI() {
 
 updateVoiceToggleUI();
 
-voiceToggleBtn.addEventListener("click", () => {
-  autoReadAloud = !autoReadAloud;
-  localStorage.setItem("autoReadAloud", autoReadAloud);
-  updateVoiceToggleUI();
-  if (!autoReadAloud) {
-    stopSpeaking();
-  }
-});
+if (voiceToggleBtn) {
+  voiceToggleBtn.addEventListener("click", () => {
+    autoReadAloud = !autoReadAloud;
+    localStorage.setItem("autoReadAloud", autoReadAloud);
+    updateVoiceToggleUI();
+    if (!autoReadAloud) {
+      stopSpeaking();
+    }
+  });
+}
 
 // ── Speech Synthesis (Voice Output) ───────────────────
 let activeSpeakerWrapper = null;
@@ -632,9 +635,12 @@ function speakMessage(wrapper) {
   const myGeneration = speakGeneration;
 
   try {
+    const fetchHeaders = { "Content-Type": "application/json" };
+    if (window.API_KEY) fetchHeaders["X-API-Key"] = window.API_KEY;
+
     fetch("/voice/synthesize", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: fetchHeaders,
       body: JSON.stringify({ text: cleanText })
     })
     .then(res => {
@@ -871,8 +877,12 @@ async function sendAudioToWhisper(blob) {
   formData.append("file", blob, "voice.webm");
   
   try {
+    const fetchHeaders = {};
+    if (window.API_KEY) fetchHeaders["X-API-Key"] = window.API_KEY;
+
     const res = await fetch("/voice/transcribe", {
       method: "POST",
+      headers: fetchHeaders,
       body: formData
     });
     if (!res.ok) throw new Error("Whisper transcription failed");
@@ -916,9 +926,12 @@ async function speakVoiceModeMessage(text) {
   const myGeneration = speakGeneration;
 
   try {
+    const fetchHeaders = { "Content-Type": "application/json" };
+    if (window.API_KEY) fetchHeaders["X-API-Key"] = window.API_KEY;
+
     const res = await fetch("/voice/synthesize", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: fetchHeaders,
       body: JSON.stringify({ text: cleanText }),
     });
 
@@ -1055,25 +1068,29 @@ function startVoiceModeListening() {
 }
 
 // Event Listeners for Voice Mode Controls
-voiceModeBtn.addEventListener("click", () => {
-  // Unlock browser audio autoplay during this direct user gesture
-  unlockAudio();
+if (voiceModeBtn) {
+  voiceModeBtn.addEventListener("click", () => {
+    // Unlock browser audio autoplay during this direct user gesture
+    unlockAudio();
 
-  stopSpeaking();
-  voiceModeState = "listening";
-  
-  voiceUserSpeech.textContent = "";
-  voiceBotSpeech.textContent = "Hi, I'm listening. Ask me anything about PhD regulations.";
-  
-  voiceModeOverlay.classList.remove("hidden");
-  voiceModeOverlay.classList.remove("thinking", "speaking");
-  voiceModeOverlay.classList.add("listening");
-  voiceStatusText.textContent = "Listening...";
+    stopSpeaking();
+    voiceModeState = "listening";
 
-  startRecording();
-});
+    if (voiceUserSpeech) voiceUserSpeech.textContent = "";
+    if (voiceBotSpeech) voiceBotSpeech.textContent = "Hi, I'm listening. Ask me anything about PhD regulations.";
 
-exitVoiceModeBtn.addEventListener("click", exitVoiceMode);
+    if (voiceModeOverlay) {
+      voiceModeOverlay.classList.remove("hidden");
+      voiceModeOverlay.classList.remove("thinking", "speaking");
+      voiceModeOverlay.classList.add("listening");
+    }
+    if (voiceStatusText) voiceStatusText.textContent = "Listening...";
+
+    startRecording();
+  });
+}
+
+if (exitVoiceModeBtn) exitVoiceModeBtn.addEventListener("click", exitVoiceMode);
 
 const visualizer = document.querySelector(".voice-visualizer");
 if (visualizer) {

@@ -8,12 +8,14 @@ services:
     ports:
       - "45123:45123"
     environment:
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_URL=http://host.docker.internal:11434/api/chat
       - EMBEDDING_MODEL=BAAI/bge-base-en-v1.5
       - RERANK_MODEL=BAAI/bge-reranker-base
       - OLLAMA_MODEL=qwen2.5:7b-instruct-q4_K_M
       - OLLAMA_NUM_PARALLEL=4
       - DATABASE_URL=postgresql+asyncpg://sutra_admin:sutra_secure_password@postgres:5432/sutra_db
+      - API_KEY=${API_KEY}
+      - API_PORT=45123
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

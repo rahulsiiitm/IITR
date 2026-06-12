@@ -31,7 +31,27 @@ class IntentRouter:
         """Classify the user's intent into predefined categories."""
         if len(question.strip()) < 2:
             return "out of domain"
-            
+
+        # ── Keyword guardrail: if the question mentions known regulatory topics,
+        # always treat it as academic regardless of NLI classifier confidence.
+        REGULATORY_KEYWORDS = {
+            "candidacy", "candidate", "phd", "thesis", "dissertation",
+            "cgpa", "sgpa", "grade", "coursework", "course", "credit",
+            "admission", "admit", "apply", "application", "eligib",
+            "gate", "exempt", "fellowship", "stipend", "scholarship",
+            "supervisor", "guide", "advisor", "committee", "src", "drc",
+            "irc", "daa", "comprehensive", "examination", "research proposal",
+            "synopsis", "viva", "defense", "defence", "oral", "submission",
+            "registration", "enroll", "semester", "regulation", "rule",
+            "requirement", "duration", "period", "leave", "absence",
+            "part-time", "full-time", "convert", "transfer", "progress",
+            "annual review", "annual progress", "extension", "deadline",
+        }
+        q_lower = question.lower()
+        if any(kw in q_lower for kw in REGULATORY_KEYWORDS):
+            logger.info("Intent Router: keyword guardrail → academic")
+            return "academic"
+
         result = self.classifier(question, self.labels)
         top_intent = result["labels"][0]
         confidence = result["scores"][0]

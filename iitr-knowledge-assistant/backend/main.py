@@ -7,9 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from backend.api.routes.ask import router as ask_router
-from backend.api.routes.voice import router as voice_router
+# from backend.api.routes.voice import router as voice_router  # disabled — re-enable when voice is added back
 from backend.api.routes.admin import router as admin_router
-from backend.services.voice_service import init_voice_models
+# from backend.services.voice_service import init_voice_models  # disabled — re-enable when voice is added back
 from backend.config import PROJECT_ROOT, settings
 from backend.indexing.build_index import load_index
 from backend.logging.analytics import setup_logging
@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         logger.info("BM25 index initialized successfully")
 
         # Pre-initialize voice models
-        init_voice_models()
+        # init_voice_models()
     except FileNotFoundError as exc:
         app.state.faiss_index = None
         app.state.chunks = None
@@ -63,12 +63,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "X-API-Key"],
 )
 
 app.include_router(ask_router)
-app.include_router(voice_router)
+# app.include_router(voice_router)
 app.include_router(admin_router)
 
 

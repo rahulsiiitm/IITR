@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from backend.database import get_db
 from backend.models import Session, Message
 from backend.config import settings
@@ -54,5 +54,12 @@ async def delete_session(session_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Session not found")
     
     await db.delete(session)
+    await db.commit()
+    return {"status": "success"}
+
+@router.delete("/sessions")
+async def delete_all_sessions(db: AsyncSession = Depends(get_db)):
+    await db.execute(delete(Message))
+    await db.execute(delete(Session))
     await db.commit()
     return {"status": "success"}
