@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 COPY data/ ./data/
-COPY vector_db/ ./vector_db/
+RUN mkdir -p vector_db/indexes vector_db/metadata
 COPY scripts/ ./scripts/
 
 # Create environment variable defaults
@@ -27,4 +27,4 @@ ENV CUDA_VISIBLE_DEVICES=""
 EXPOSE 45123
 
 # Start the uvicorn application after initializing the database
-CMD ["sh", "-c", "python -m backend.init_db && python -m uvicorn backend.main:app --host 0.0.0.0 --port 45123 --workers 1"]
+CMD ["sh", "-c", "if [ ! -f vector_db/indexes/faiss.index ]; then python scripts/build_index.py; fi && python -m backend.init_db && python -m uvicorn backend.main:app --host 0.0.0.0 --port 45123 --workers 1"]
