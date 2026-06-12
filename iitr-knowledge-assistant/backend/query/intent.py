@@ -30,7 +30,26 @@ class IntentRouter:
     def classify(self, question: str) -> str:
         """Classify the user's intent into predefined categories."""
         if len(question.strip()) < 2:
-            return "out of domain"
+            return "out_of_domain"
+
+        q_lower = question.lower()
+        
+        # ── Out of Domain Blocklist ──
+        # Block specific queries that are explicitly unanswerable or out of domain.
+        if "how many students" in q_lower or "number of students" in q_lower:
+            logger.info("Intent Router: OOD phrase blocklist → out_of_domain")
+            return "out_of_domain"
+        if "director" in q_lower and ("who is" in q_lower or "name" in q_lower):
+            logger.info("Intent Router: OOD phrase blocklist → out_of_domain")
+            return "out_of_domain"
+        if "average cgpa" in q_lower or "average marks" in q_lower:
+            logger.info("Intent Router: OOD phrase blocklist → out_of_domain")
+            return "out_of_domain"
+            
+        OOD_KEYWORDS = {"nirf", "placement", "salary", "package", "hostel", "fee", "dean", "ranking", "enrolled", "enrollment", "mess"}
+        if any(kw in q_lower for kw in OOD_KEYWORDS):
+            logger.info("Intent Router: OOD keyword blocklist → out_of_domain")
+            return "out_of_domain"
 
         # ── Keyword guardrail: if the question mentions known regulatory topics,
         # always treat it as academic regardless of NLI classifier confidence.

@@ -106,10 +106,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
     result = await db.execute(select(Message).where(Message.session_id == session_id).order_by(Message.created_at))
     db_messages = result.scalars().all()
-    # history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
-    
-    # User requested stateless testing mode: do not read previous context.
-    history = []
+    history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
 
     timer = RequestTimer()
 
@@ -125,18 +122,18 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     if vague:
         return await make_response(vague, [])
 
+    search_queries = await rewrite_query(question, history)
+    query_for_intent = search_queries[0] if search_queries else question
+
     # === Pre-Flight Intent Routing ===
     from backend.query.intent import get_intent_router
     from backend.generation.llm import generate_conversational
     
     router_instance = get_intent_router()
-    intent = router_instance.classify(question)
+    intent = router_instance.classify(query_for_intent)
     
     if intent == "out_of_domain":
-        return await make_response(
-            "This information is not available in the provided document. I can only answer questions related to IIT Roorkee PhD regulations.",
-            []
-        )
+        return await make_response(NOT_AVAILABLE, [])
     elif intent == "conversational":
         async with llm_semaphore:
             ans = await generate_conversational(question, history)
@@ -164,8 +161,6 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     index, chunks = _get_index_state(request)
 
     try:
-        search_queries = await rewrite_query(question, history)
-        
         logger.info("--- OPTIMIZED SEARCH QUERIES ---")
         for i, sq in enumerate(search_queries, 1):
             logger.info(f"  {i}. {sq}")
@@ -261,23 +256,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
         if not is_confident:
             return await make_response(NOT_AVAILABLE, [])
 
-        # Entity-presence validation to block hallucinations on out-of-domain queries
-        context_text = "\n".join(c["chunk"].lower() for c in all_expanded)
-        q_lower = question.lower()
-        
-        # Block queries containing students enrollment count queries
-        if "how many students" in q_lower or "number of students" in q_lower:
-            return await make_response(NOT_AVAILABLE, [])
 
-        # Block specific out-of-domain or unanswerable queries
-        if "director" in q_lower and ("who is" in q_lower or "name" in q_lower):
-            return await make_response(NOT_AVAILABLE, [])
-        if "average cgpa" in q_lower or "average marks" in q_lower:
-            return await make_response(NOT_AVAILABLE, [])
-            
-        for kw in ["nirf", "placement", "salary", "package", "hostel", "fee", "dean", "ranking", "enrolled", "enrollment", "mess"]:
-            if kw in q_lower:
-                return await make_response(NOT_AVAILABLE, [])
 
         async with llm_semaphore:
             result = await generate_from_evidence(question, merged_evidence, all_expanded, history)
@@ -361,21 +340,28 @@ async def ask_stream(
         await db.commit()
         session_id = db_session.id
 
+    result = await db.execute(select(Message).where(Message.session_id == session_id).order_by(Message.created_at))
+    db_messages = result.scalars().all()
+    history = [{"role": msg.role, "content": msg.content} for msg in db_messages[-10:]]
+
     # Run the full retrieval + evidence pipeline before opening the stream
     index, chunks = _get_index_state(request)
 
     async def _pipeline_then_stream():
         """Async generator that first runs the full pipeline, then streams the answer."""
         try:
+            search_queries = await rewrite_query(question, history)
+            query_for_intent = search_queries[0] if search_queries else question
+
             # ── Intent Router (Conversational/Out of Domain) ─────────────────
             from backend.query.intent import get_intent_router
             from backend.generation.llm import generate_conversational
             
             router_instance = get_intent_router()
-            intent = router_instance.classify(question)
+            intent = router_instance.classify(query_for_intent)
             
             if intent == "out_of_domain":
-                ans = "This information is not available in the provided document. I can only answer questions related to IIT Roorkee PhD regulations."
+                ans = NOT_AVAILABLE
                 db.add_all([
                     Message(session_id=session_id, role="user", content=question),
                     Message(session_id=session_id, role="assistant", content=ans, sources=[]),
@@ -385,7 +371,7 @@ async def ask_stream(
                 yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
                 return
             elif intent == "conversational":
-                ans = await generate_conversational(question, [])
+                ans = await generate_conversational(question, history)
                 db.add_all([
                     Message(session_id=session_id, role="user", content=question),
                     Message(session_id=session_id, role="assistant", content=ans, sources=[]),
@@ -427,29 +413,7 @@ async def ask_stream(
                 yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
                 return
 
-            # ── Domain blocking ──────────────────────────────────────────────
-            q_lower = question.lower()
-            blocked = (
-                any(k in q_lower for k in ["how many students", "number of students"])
-                or ("director" in q_lower and any(w in q_lower for w in ["who is", "name"]))
-                or any(k in q_lower for k in ["nirf", "placement", "salary", "package",
-                                               "hostel", "fee", "dean", "ranking",
-                                               "enrolled", "enrollment", "mess",
-                                               "average cgpa", "average marks"])
-            )
-            if blocked:
-                db.add_all([
-                    Message(session_id=session_id, role="user", content=question),
-                    Message(session_id=session_id, role="assistant", content=NOT_AVAILABLE, sources=[]),
-                ])
-                await db.commit()
-                yield f"data: {json.dumps({'type': 'token', 'content': NOT_AVAILABLE})}\n\n"
-                yield f"data: {json.dumps({'type': 'done', 'sources': [], 'session_id': session_id})}\n\n"
-                return
-
             # ── Retrieval + evidence (blocking, before stream opens) ─────────
-            search_queries = await rewrite_query(question, [])
-
             num_queries = len(search_queries)
             evidence_top_k = 4 if num_queries == 1 else (3 if num_queries == 2 else 2)
             EVIDENCE_CHAR_BUDGET = 6_000
@@ -521,7 +485,7 @@ async def ask_stream(
             # ── Stream the answer ────────────────────────────────────────────
             full_answer = ""
             async with llm_semaphore:
-                async for token in stream_answer_from_evidence(question, merged_evidence, all_expanded):
+                async for token in stream_answer_from_evidence(question, merged_evidence, all_expanded, history):
                     full_answer += token
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
 
