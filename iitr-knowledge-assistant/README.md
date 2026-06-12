@@ -37,7 +37,7 @@
 
 ## Architecture
 
-```
+```text
 Browser
   │
   ▼
@@ -75,7 +75,7 @@ No internet required after models are downloaded.
 
 ## Project Structure
 
-```
+```text
 iitr-knowledge-assistant/
 ├── backend/
 │   ├── api/
@@ -155,7 +155,7 @@ cp .env.example .env
 
 ### 3. Place the PDF
 
-```
+```text
 data/raw/phd_regulations_2026.pdf
 ```
 
@@ -176,13 +176,13 @@ chmod +x scripts/run_server.sh
 
 The launcher binds to **port 45123**, writes `frontend/api-config.js` with the correct URL and API key, and prints the chat URL:
 
-```
+```text
   Open chat:  http://127.0.0.1:45123/
   Health:     http://127.0.0.1:45123/health
 ```
 
 > **Already running?** The script detects the existing server and prints its URL instead of starting a duplicate.
-
+>
 > **SSH / Cursor remote?** Forward port `45123` in the Ports panel, then open the forwarded URL in your browser.
 
 ---
@@ -197,7 +197,7 @@ export API_KEY=your_secret_key_here
 
 Or add it to a `.env` file in the project root:
 
-```
+```env
 API_KEY=your_secret_key_here
 ```
 
