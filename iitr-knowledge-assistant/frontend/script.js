@@ -798,6 +798,8 @@ async function startRecording() {
       startRecording(); // too short / silence — try again
     }
   };
+}
+
 
   // Web Audio VAD
   try {
@@ -862,7 +864,7 @@ async function startRecording() {
   } catch (err) {
     console.error("VAD initialization failed:", err);
   }
-}
+
 
 async function sendAudioToWhisper(blob) {
   // Don't process if voice mode was closed while we were recording
@@ -1138,4 +1140,79 @@ function openPdfViewer(filename, pageNumber) {
   // Use #page=N native fragment for PDF
   iframe.src = `/docs/${encodeURIComponent(filename)}#page=${pageNumber}`;
   modal.classList.add("open");
+}
+
+// ── App Initialization & Model Loading Check ──────────
+document.addEventListener("DOMContentLoaded", () => {
+  checkModelLoadingStatus();
+});
+
+async function checkModelLoadingStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.models_loading) {
+        showModelLoadingDialog();
+        pollModelLoadingStatus();
+      }
+    }
+  } catch (err) {
+    console.warn("Could not check health status", err);
+  }
+}
+
+function showModelLoadingDialog() {
+  let overlay = document.getElementById("modelLoadingOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "modelLoadingOverlay";
+    overlay.innerHTML = `
+      <div style="background: white; padding: 2rem; border-radius: 12px; text-align: center; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <h3 style="margin-top: 0; color: #1a1a1a;">Initializing Models</h3>
+        <p style="color: #666; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
+          The system is currently downloading or loading AI models into memory. This only happens once on startup and may take a minute.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 8px;">
+          <div class="spinner-dot" style="width: 10px; height: 10px; background: #0066cc; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both;"></div>
+          <div class="spinner-dot" style="width: 10px; height: 10px; background: #0066cc; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s;"></div>
+          <div class="spinner-dot" style="width: 10px; height: 10px; background: #0066cc; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s;"></div>
+        </div>
+        <style>
+          @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        </style>
+      </div>
+    `;
+    Object.assign(overlay.style, {
+      position: "fixed", top: "0", left: "0", width: "100%", height: "100%",
+      backgroundColor: "rgba(0,0,0,0.6)", zIndex: "9999",
+      display: "flex", justifyContent: "center", alignItems: "center",
+      backdropFilter: "blur(4px)"
+    });
+    document.body.appendChild(overlay);
+  }
+}
+
+function removeModelLoadingDialog() {
+  const overlay = document.getElementById("modelLoadingOverlay");
+  if (overlay) {
+    overlay.remove();
+  }
+}
+
+async function pollModelLoadingStatus() {
+  const interval = setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/health`);
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.models_loading) {
+          clearInterval(interval);
+          removeModelLoadingDialog();
+        }
+      }
+    } catch (err) {
+      // Ignore network errors during polling
+    }
+  }, 2000);
 }

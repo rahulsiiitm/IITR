@@ -1,3 +1,4 @@
+import re
 import logging
 import json
 from backend.prompts import QUERY_REWRITER_PROMPT
@@ -37,19 +38,16 @@ async def rewrite_query(question: str, history: list[dict] = None) -> list[str]:
     logger.debug(f"Raw Rewriter Output:\n{response}")
     
     try:
-        clean_json = response.strip()
-        if clean_json.startswith("```json"):
-            clean_json = clean_json[7:]
-        elif clean_json.startswith("```"):
-            clean_json = clean_json[3:]
-        if clean_json.endswith("```"):
-            clean_json = clean_json[:-3]
-        clean_json = clean_json.strip()
-
-        queries = json.loads(clean_json)
-        
-        if isinstance(queries, list) and all(isinstance(q, str) for q in queries):
-            return queries
+        # Find the first '[' and the last ']' to extract the JSON array
+        match = re.search(r"\[.*\]", response, re.DOTALL)
+        if match:
+            clean_json = match.group(0)
+            queries = json.loads(clean_json)
+            
+            if isinstance(queries, list) and all(isinstance(q, str) for q in queries):
+                return queries
+        else:
+            logger.warning(f"No JSON array found in rewriter response. Raw: {response}")
             
     except Exception as e:
         logger.warning(f"Query rewrite failed. Falling back to raw question. Error: {e}\nRaw: {response}")

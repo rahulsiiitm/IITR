@@ -5,7 +5,7 @@ import httpx
 
 from backend.config import settings
 from backend.generation.context_builder import build_context
-from backend.prompts import EVIDENCE_EXTRACTOR_PROMPT, SYSTEM_PROMPT, VERIFIER_PROMPT, build_greeting_prompt, build_user_prompt
+from backend.prompts import EVIDENCE_EXTRACTOR_PROMPT, SYSTEM_PROMPT, VERIFIER_PROMPT, EVIDENCE_SYNTHESIZER_PROMPT, build_greeting_prompt, build_user_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +111,22 @@ async def extract_evidence(question: str, context_chunks: list[dict]) -> str:
     return evidence_text
 
 
+async def synthesize_evidence(question: str, evidence_list: list[str]) -> str:
+    """Synthesize multiple evidence snippets into a single coherent block."""
+    if not evidence_list:
+        return "NO_EVIDENCE"
+    if len(evidence_list) == 1:
+        return evidence_list[0]
+        
+    snippets = "\n\n---\n\n".join(evidence_list)
+    user_prompt = f"Question: {question}\n\nEvidence Snippets:\n{snippets}"
+    
+    logger.debug(f"Synthesizing {len(evidence_list)} evidence snippets for: '{question}'")
+    synthesized = await _call_ollama(EVIDENCE_SYNTHESIZER_PROMPT, user_prompt)
+    logger.debug(f"--- SYNTHESIZED EVIDENCE ---\n{synthesized}\n--------------------------")
+    return synthesized
+
+
 async def generate_from_evidence(question: str, evidence_text: str, context_chunks: list[dict], history: list[dict] = None) -> dict:
     """Generate final answer using the aggregated evidence."""
     if "NO_EVIDENCE" in evidence_text.upper() or not evidence_text.strip():
@@ -173,7 +189,7 @@ async def stream_answer_from_evidence(
             buffer += token
             if "Answer:" in buffer:
                 # Strip everything up to and including "Answer:" then flush remainder
-                remainder = buffer.split("Answer:", 1)[-1]
+                remainder = buffer.split("Answer:", 1)[-1].lstrip()
                 buffer = ""
                 answer_started = True
                 if remainder:
@@ -183,6 +199,14 @@ async def stream_answer_from_evidence(
                 answer_started = True
                 yield buffer
                 buffer = ""
+
+    # If stream ends and we never flushed the buffer, yield whatever is left.
+    # This prevents completely blank responses if the model returns a very short answer
+    # (under 50 chars) that lacks the "Answer:" prefix.
+    logger.info(f"[DEBUG STREAM] Loop ended. answer_started={answer_started}, buffer='{buffer}'")
+    if not answer_started and buffer:
+        logger.info(f"[DEBUG STREAM] Yielding leftover buffer: '{buffer}'")
+        yield buffer
 
 async def generate_conversational(question: str, history: list[dict] = None) -> str:
     """Generate a conversational response without RAG context."""

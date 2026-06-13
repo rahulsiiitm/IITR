@@ -21,6 +21,8 @@ async def lifespan(app: FastAPI):
     setup_logging(settings.log_level)
     logger.info(f"USING FAISS PATH: {settings.faiss_index_path}")
     logger.info("Loading FAISS index from %s", settings.faiss_index_path)
+    
+    app.state.models_loading = True
 
     try:
         index, chunks = load_index()
@@ -34,13 +36,30 @@ async def lifespan(app: FastAPI):
         get_bm25_index(chunks)
         logger.info("BM25 index initialized successfully")
 
-        # Pre-initialize voice models
-        # init_voice_models()
     except FileNotFoundError as exc:
         app.state.faiss_index = None
         app.state.chunks = None
         app.state.index_loaded = False
         logger.warning("Index not loaded: %s", exc)
+
+    # Initialize LLM semaphore
+    import asyncio
+    app.state.llm_semaphore = asyncio.Semaphore(2)
+
+    async def load_hf_models():
+        logger.info("Pre-fetching HuggingFace models in background...")
+        def _load():
+            from backend.retrieval.search import get_encoder
+            get_encoder()
+            from backend.retrieval.rerank import get_ranker
+            get_ranker()
+            from backend.query.intent import get_intent_router
+            get_intent_router()
+        await asyncio.to_thread(_load)
+        logger.info("All HuggingFace models initialized successfully")
+        app.state.models_loading = False
+
+    asyncio.create_task(load_hf_models())
 
     yield
 
@@ -74,10 +93,12 @@ app.include_router(admin_router)
 @app.get("/health")
 def health():
     index_loaded = getattr(app.state, "index_loaded", False)
+    models_loading = getattr(app.state, "models_loading", False)
     chunk_count = len(app.state.chunks) if index_loaded else 0
     return {
-        "status": "ok" if index_loaded else "degraded",
+        "status": "ok" if index_loaded and not models_loading else ("loading" if models_loading else "degraded"),
         "index_loaded": index_loaded,
+        "models_loading": models_loading,
         "chunk_count": chunk_count,
         "embedding_model": settings.embedding_model,
         "rerank_model": settings.rerank_model,

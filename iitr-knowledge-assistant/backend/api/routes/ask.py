@@ -18,7 +18,7 @@ from backend.models import Session, Message
 import json
 
 from fastapi.responses import StreamingResponse
-from backend.generation.llm import extract_evidence, generate_from_evidence, stream_answer_from_evidence, _format_sources
+from backend.generation.llm import extract_evidence, generate_from_evidence, stream_answer_from_evidence, _format_sources, synthesize_evidence
 from backend.generation.rewriter import rewrite_query
 from backend.logging.analytics import RequestTimer, log_ask_request
 from backend.query.processor import retrieve_candidates, select_reranked_per_page
@@ -33,9 +33,6 @@ from backend.retrieval.rerank import check_confidence, expand_context
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-llm_semaphore = asyncio.Semaphore(2)
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -87,6 +84,9 @@ def _get_index_state(request: Request) -> tuple[Any, list[dict]]:
 @router.post("/ask", response_model=AskResponse)
 @limiter.limit("20/minute")
 async def ask_question(body: AskRequest, request: Request, api_key: str = Depends(get_api_key), db: AsyncSession = Depends(get_db)) -> AskResponse:
+    if getattr(request.app.state, "models_loading", False):
+        raise HTTPException(status_code=503, detail="Models are still downloading/initializing. Please try again in a few moments.")
+
     question = body.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="No question provided")
@@ -130,12 +130,12 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
     from backend.generation.llm import generate_conversational
     
     router_instance = get_intent_router()
-    intent = router_instance.classify(query_for_intent)
+    intent = router_instance.classify(question)
     
     if intent == "out_of_domain":
         return await make_response(NOT_AVAILABLE, [])
     elif intent == "conversational":
-        async with llm_semaphore:
+        async with request.app.state.llm_semaphore:
             ans = await generate_conversational(question, history)
         return await make_response(ans, [])
     # =================================
@@ -215,7 +215,11 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
                 all_evidence.append(evidence_text)
 
         all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
-        merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
+        
+        merged_evidence = "NO_EVIDENCE"
+        if all_evidence:
+            async with request.app.state.llm_semaphore:
+                merged_evidence = await synthesize_evidence(question, all_evidence)
         
         # Precisely identify which chunks were actually quoted in the extracted evidence
         used_chunks = []
@@ -258,7 +262,7 @@ async def ask_question(body: AskRequest, request: Request, api_key: str = Depend
 
 
 
-        async with llm_semaphore:
+        async with request.app.state.llm_semaphore:
             result = await generate_from_evidence(question, merged_evidence, all_expanded, history)
         ans_text = result["answer"]
         ans_text_lower = ans_text.lower()
@@ -323,6 +327,9 @@ async def ask_stream(
     api_key: str = Depends(get_api_key),
     db: AsyncSession = Depends(get_db),
 ) -> StreamingResponse:
+    if getattr(request.app.state, "models_loading", False):
+        raise HTTPException(status_code=503, detail="Models are still downloading/initializing. Please try again in a few moments.")
+
     question = body.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="No question provided")
@@ -358,7 +365,7 @@ async def ask_stream(
             from backend.generation.llm import generate_conversational
             
             router_instance = get_intent_router()
-            intent = router_instance.classify(query_for_intent)
+            intent = router_instance.classify(question)
             
             if intent == "out_of_domain":
                 ans = NOT_AVAILABLE
@@ -446,7 +453,10 @@ async def ask_stream(
                     all_evidence.append(ev)
 
             all_expanded = sorted(all_expanded, key=lambda c: c.get("page", 0))
-            merged_evidence = "\n\n".join(all_evidence) if all_evidence else "NO_EVIDENCE"
+            merged_evidence = "NO_EVIDENCE"
+            if all_evidence:
+                async with request.app.state.llm_semaphore:
+                    merged_evidence = await synthesize_evidence(question, all_evidence)
             
             # Precisely identify which chunks were actually quoted in the extracted evidence
             used_chunks = []
@@ -484,7 +494,7 @@ async def ask_stream(
 
             # ── Stream the answer ────────────────────────────────────────────
             full_answer = ""
-            async with llm_semaphore:
+            async with request.app.state.llm_semaphore:
                 async for token in stream_answer_from_evidence(question, merged_evidence, all_expanded, history):
                     full_answer += token
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"

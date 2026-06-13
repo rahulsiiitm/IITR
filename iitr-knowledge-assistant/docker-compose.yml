@@ -14,6 +14,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - API_KEY=${API_KEY}
       - API_PORT=45123
+      - HF_HOME=/app/vector_db/.cache/huggingface
     volumes:
       - ./data:/app/data
       - ./vector_db:/app/vector_db
