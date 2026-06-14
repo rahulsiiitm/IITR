@@ -14,8 +14,7 @@ from backend.ingestion.metadata import attach_metadata
 from backend.ingestion.pdf_loader import extract_pages
 
 
-def _get_encoder() -> SentenceTransformer:
-    return SentenceTransformer(settings.embedding_model, device="cpu")
+from backend.retrieval.search import get_encoder
 
 
 def ingest_document(pdf_path: Path, start_id: int = 1) -> list[dict]:
@@ -45,7 +44,7 @@ def build_and_save_index() -> tuple[faiss.IndexFlatIP, list[dict]]:
     if not chunks:
         raise ValueError(f"No PDFs found in {settings.data_dir}")
 
-    encoder = _get_encoder()
+    encoder = get_encoder()
     texts = [c["text"] for c in chunks]
     embeddings = encoder.encode(texts, show_progress_bar=True)
     embeddings = np.array(embeddings).astype("float32")
@@ -67,6 +66,37 @@ def build_and_save_index() -> tuple[faiss.IndexFlatIP, list[dict]]:
     with open(settings.chunks_metadata_path, "w", encoding="utf-8") as f:
         json.dump(chunks, f, indent=2, ensure_ascii=False)
 
+    return index, chunks
+
+
+def index_single_document(pdf_path: Path, index: faiss.IndexFlatIP, chunks: list[dict]) -> tuple[faiss.IndexFlatIP, list[dict]]:
+    """Dynamically add a single document to an existing FAISS index and chunk list."""
+    if not pdf_path.exists():
+        raise FileNotFoundError(f"PDF not found: {pdf_path}")
+        
+    logger.info(f"Dynamically processing: {pdf_path.name}")
+    start_id = len(chunks) + 1 if chunks else 1
+    doc_chunks = ingest_document(pdf_path, start_id)
+    
+    if not doc_chunks:
+        return index, chunks
+        
+    encoder = get_encoder()
+    texts = [c["text"] for c in doc_chunks]
+    embeddings = encoder.encode(texts, show_progress_bar=False)
+    embeddings = np.array(embeddings).astype("float32")
+    faiss.normalize_L2(embeddings)
+    
+    index.add(embeddings)
+    chunks.extend(doc_chunks)
+    
+    settings.faiss_index_path.parent.mkdir(parents=True, exist_ok=True)
+    settings.chunks_metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    faiss.write_index(index, str(settings.faiss_index_path))
+    with open(settings.chunks_metadata_path, "w", encoding="utf-8") as f:
+        json.dump(chunks, f, indent=2, ensure_ascii=False)
+        
     return index, chunks
 
 

@@ -43,6 +43,10 @@
           Sessions
           <span class="nav-badge" id="sessions-badge"></span>
         </div>
+        <div class="nav-item" data-view="documents">
+          <i class="fa-solid fa-file-pdf"></i>
+          Documents
+        </div>
         <div class="nav-item" data-view="settings">
           <i class="fa-solid fa-gear"></i>
           Settings
@@ -179,6 +183,36 @@
 
       </div>
 
+      <!-- ══ DOCUMENTS ══ -->
+      <div class="view-container" id="view-documents">
+        <div class="documents-scroll" style="padding:20px;">
+          <div class="section-header" style="margin-bottom: 20px;">
+            <div class="section-title">Knowledge Base Documents</div>
+            <div class="document-actions">
+              <input type="file" id="file-upload" accept=".pdf" style="display:none;" />
+              <button class="btn btn-secondary" onclick="document.getElementById('file-upload').click()">
+                <i class="fa-solid fa-upload"></i> Upload PDF
+              </button>
+              <button class="btn btn-secondary" onclick="loadDocuments()">
+                <i class="fa-solid fa-rotate"></i> Refresh
+              </button>
+            </div>
+          </div>
+          
+          <div class="upload-progress-container" id="upload-progress-container" style="display:none; margin-bottom: 20px;">
+            <div class="loading-spinner">
+              <i class="fa-solid fa-circle-notch fa-spin"></i> Uploading & Indexing...
+            </div>
+          </div>
+
+          <div class="documents-grid" id="documents-grid" style="display: grid; gap: 12px;">
+            <div class="loading-spinner">
+              <i class="fa-solid fa-circle-notch fa-spin"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ══ SETTINGS ══ -->
       <div class="view-container" id="view-settings">
         <div class="settings-scroll">
@@ -203,7 +237,7 @@
   </div>
 
   <script src="/api-config.js"></script>
-  <script src="admin.js?v=5"></script>
+  <script src="admin.js?v=8"></script>
 
   <!-- Confirm Modal -->
   <div id="confirmModal" class="confirm-modal-backdrop" aria-modal="true" role="dialog"

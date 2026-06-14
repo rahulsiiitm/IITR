@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dashboard: ['Dashboard', 'Overview'],
     sessions: ['Sessions', 'Conversation Log'],
     settings: ['Settings', 'Configuration'],
+    documents: ['Documents', 'Knowledge Base'],
   };
 
   /* ── Utilities ── */
@@ -105,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (view === 'dashboard') loadDashboardStats();
       if (view === 'settings') loadSettings();
+      if (view === 'documents') window.loadDocuments();
     });
   });
 
@@ -464,6 +466,110 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnDeleteAllSessions) {
     btnDeleteAllSessions.addEventListener('click', handleDeleteAllSessions);
+  }
+
+  /* ══ DOCUMENTS ══ */
+  window.loadDocuments = async function() {
+    const grid = document.getElementById('documents-grid');
+    grid.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i></div>';
+    
+    try {
+      const res = await fetch('/api/admin/documents');
+      if (!res.ok) throw new Error('Failed to fetch documents');
+      const docs = await res.json();
+      
+      if (!docs.length) {
+        grid.innerHTML = '<div class="empty-state"><p>No documents uploaded yet.</p></div>';
+        return;
+      }
+      
+      grid.innerHTML = docs.map(doc => `
+        <div class="settings-card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;">
+          <div>
+            <div style="font-weight: 500; font-size: 0.9rem; color: var(--text-base); margin-bottom: 4px;">
+              <i class="fa-solid fa-file-pdf" style="color: #e53e3e; margin-right: 6px;"></i>
+              ${escapeHtml(doc.title || doc.filename)}
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-light); display: flex; gap: 12px;">
+              <span><i class="fa-solid fa-file-lines"></i> ${escapeHtml(doc.filename)}</span>
+              <span><i class="fa-regular fa-clock"></i> ${formatDate(doc.created_at)}</span>
+              <span style="color: ${doc.status === 'active' ? 'var(--success)' : doc.status === 'processing' ? 'var(--accent)' : 'var(--danger)'}">
+                <i class="fa-solid ${doc.status === 'active' ? 'fa-check-circle' : doc.status === 'processing' ? 'fa-circle-notch fa-spin' : 'fa-circle-xmark'}"></i>
+                ${doc.status.charAt(0).toUpperCase() + doc.status.slice(1)}
+              </span>
+            </div>
+            ${doc.error_message ? `<div style="font-size: 0.7rem; color: var(--danger); margin-top: 4px; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Error: ${escapeHtml(doc.error_message)}</div>` : ''}
+          </div>
+          <div>
+            <button class="btn btn-danger" onclick="deleteDocument('${doc.id}', '${escapeHtml(doc.filename)}')" style="padding: 6px 10px;">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      
+    } catch (err) {
+      console.error(err);
+      grid.innerHTML = '<div class="empty-state"><p>Failed to load documents.</p></div>';
+    }
+  };
+
+  window.deleteDocument = async function(id, filename) {
+    const ok = await showConfirm('Delete Document', `Are you sure you want to delete "${filename}"?`);
+    if (!ok) return;
+    
+    try {
+      const res = await fetch(`/api/admin/documents/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      if (res.ok) {
+        window.loadDocuments();
+      } else {
+        alert('Failed to delete document.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error deleting document.');
+    }
+  };
+
+  const fileUpload = document.getElementById('file-upload');
+  if (fileUpload) {
+    fileUpload.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const progressContainer = document.getElementById('upload-progress-container');
+      progressContainer.style.display = 'block';
+      fileUpload.value = ''; // reset
+      
+      try {
+        const res = await fetch('/api/admin/documents', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (res.ok) {
+          window.loadDocuments();
+          // Poll to refresh status while processing
+          let pollCount = 0;
+          const pollInterval = setInterval(() => {
+            window.loadDocuments();
+            pollCount++;
+            if (pollCount > 20) clearInterval(pollInterval); // Stop polling after a while
+          }, 5000);
+        } else {
+          const data = await res.json();
+          alert(data.detail || 'Upload failed');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error uploading document.');
+      } finally {
+        progressContainer.style.display = 'none';
+      }
+    });
   }
 
   /* ── Init ── */

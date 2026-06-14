@@ -76,9 +76,9 @@ class BM25Okapi:
 
 _global_bm25: BM25Okapi | None = None
 
-def get_bm25_index(chunks: list[dict]) -> BM25Okapi:
+def get_bm25_index(chunks: list[dict], force_rebuild: bool = False) -> BM25Okapi:
     global _global_bm25
-    if _global_bm25 is None:
+    if _global_bm25 is None or force_rebuild:
         corpus = [c.get("text", c.get("chunk", "")) for c in chunks]
         _global_bm25 = BM25Okapi(corpus)
     return _global_bm25

@@ -61,6 +61,35 @@ async def lifespan(app: FastAPI):
 
     asyncio.create_task(load_hf_models())
 
+    # Watch data_dir for file changes
+    from watchfiles import awatch
+    from backend.indexing.build_index import build_and_save_index
+    
+    _rebuild_lock = asyncio.Lock()
+    
+    async def watch_data_dir():
+        async for changes in awatch(settings.data_dir):
+            has_pdf = any(p.endswith(".pdf") for _, p in changes)
+            if not has_pdf:
+                continue
+                
+            logger.info("Changes detected in data/raw/, rebuilding index...")
+            if _rebuild_lock.locked():
+                continue # Skip if already building
+            async with _rebuild_lock:
+                try:
+                    index, chunks = await asyncio.to_thread(build_and_save_index)
+                    app.state.faiss_index = index
+                    app.state.chunks = chunks
+                    app.state.index_loaded = True
+                    from backend.retrieval.bm25 import get_bm25_index
+                    await asyncio.to_thread(get_bm25_index, chunks, True)
+                    logger.info("Successfully automatically rebuilt index.")
+                except Exception as e:
+                    logger.exception("Failed to rebuild index from watcher.")
+
+    app.state.watcher_task = asyncio.create_task(watch_data_dir())
+
     yield
 
 

@@ -26,3 +26,13 @@ class Message(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     session = relationship("Session", back_populates="messages")
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(String, primary_key=True, default=generate_uuid, index=True)
+    filename = Column(String, nullable=False, unique=True)
+    title = Column(String, nullable=True)
+    status = Column(String, default="processing") # processing, active, failed
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
